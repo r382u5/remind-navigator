@@ -2236,7 +2236,7 @@ export default function App() {
       )}
 
       {toastMessage && (
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg font-bold text-sm flex items-center gap-2 z-50 animate-fade-in-up">
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg font-bold text-sm flex items-center gap-2 z-50 animate-toast-fade-in-up">
           <CheckCircle size={18} className="text-green-400" />
           {toastMessage}
         </div>
@@ -2244,11 +2244,19 @@ export default function App() {
 
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes fadeInUp {
-          from { opacity: 0; transform: translate(-50%, 20px); }
-          to { opacity: 1; transform: translate(-50%, 0); }
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in-up {
           animation: fadeInUp 0.3s ease-out forwards;
+        }
+
+        @keyframes toastFadeInUp {
+          from { opacity: 0; transform: translate(-50%, 20px); }
+          to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .animate-toast-fade-in-up {
+          animation: toastFadeInUp 0.3s ease-out forwards;
         }
       `}} />
     </div>
