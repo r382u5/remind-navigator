@@ -2022,18 +2022,18 @@ export default function App() {
       {/* 6. カレンダー詳細モーダル */}
       {showCalendarTaskModal && selectedCalendarTask && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden flex flex-col animate-fade-in-up">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+              <h3 className="font-bold text-base sm:text-lg text-gray-800 flex items-center gap-2">
                 <Calendar size={18} className="text-indigo-600" /> タスクの状況確認
               </h3>
               <button onClick={() => {setShowCalendarTaskModal(false); setSelectedCalendarTask(null);}} className="text-gray-400 hover:text-gray-600 p-1">✕</button>
             </div>
             
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1 min-h-0">
               <div className="mb-4">
-                <h4 className="text-xl font-black text-gray-800 mb-1">{selectedCalendarTask.title}</h4>
-                <div className="flex items-center gap-2 text-sm text-gray-600 font-medium">
+                <h4 className="text-lg sm:text-xl font-black text-gray-800 mb-1 leading-tight">{selectedCalendarTask.title}</h4>
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 font-medium">
                   <Calendar size={14} /> 期限: {selectedCalendarTask.dueDate}
                 </div>
               </div>
@@ -2041,8 +2041,8 @@ export default function App() {
               <div className="space-y-1">
                 {currentUserMode === 'admin' || currentUserMode === 'viewer' ? (
                   <>
-                    <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 border-b border-gray-200 pb-1">メンバー別進捗</h5>
-                    <div className="flex flex-col gap-1 max-h-60 overflow-y-auto pr-1">
+                    <h5 className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 border-b border-gray-200 pb-1">メンバー別進捗</h5>
+                    <div className="flex flex-col gap-1 pr-1">
                       {targetMembers.map(member => {
                         const isCompleted = selectedCalendarTask.statuses[member.id] === 'completed';
                         return (
@@ -2051,16 +2051,16 @@ export default function App() {
                                <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px] shrink-0">
                                   {member.name.charAt(0)}
                                 </div>
-                               <span className={`text-sm font-bold ${isCompleted ? 'text-gray-500' : 'text-gray-800'}`}>{member.name}</span>
+                               <span className={`text-xs sm:text-sm font-bold truncate ${isCompleted ? 'text-gray-500' : 'text-gray-800'}`}>{member.name}</span>
                             </div>
-                            <div className="shrink-0">
+                            <div className="shrink-0 ml-2">
                                {isCompleted ? (
-                                 <span className="inline-flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">
-                                   <CheckCircle size={14} /> 完了
+                                 <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-bold text-green-600 bg-green-50 px-1.5 sm:px-2 py-1 rounded">
+                                   <CheckCircle size={12} className="sm:w-[14px] sm:h-[14px]" /> 完了
                                  </span>
                                ) : (
-                                 <span className="inline-flex items-center gap-1 text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded">
-                                   <Circle size={14} /> 未完了
+                                 <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-bold text-orange-600 bg-orange-50 px-1.5 sm:px-2 py-1 rounded">
+                                   <Circle size={12} className="sm:w-[14px] sm:h-[14px]" /> 未完了
                                  </span>
                                )}
                             </div>
@@ -2076,9 +2076,9 @@ export default function App() {
                       {(() => {
                         const isCompleted = selectedCalendarTask.statuses[currentUser.id] === 'completed';
                         return (
-                          <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 border border-gray-200">
-                             <span className="font-bold text-gray-700">現在のステータス</span>
-                             <div className="shrink-0">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-xl bg-gray-50 border border-gray-200 gap-2">
+                             <span className="font-bold text-gray-700 text-sm">現在のステータス</span>
+                             <div className="shrink-0 self-start sm:self-auto">
                                 {isCompleted ? (
                                   <span className="inline-flex items-center gap-1 text-sm font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200">
                                     <CheckCircle size={16} /> 完了済み
@@ -2098,7 +2098,7 @@ export default function App() {
               </div>
             </div>
             
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-between gap-3">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-100 flex justify-between gap-3 shrink-0">
               {/* リマインド送信は管理者のみ */}
               {currentUserMode === 'admin' ? (
                 <button 
@@ -2106,17 +2106,17 @@ export default function App() {
                     setShowCalendarTaskModal(false);
                     handleInitiateRemind(selectedCalendarTask);
                   }}
-                  className="px-4 py-2 text-sm font-bold bg-orange-100 text-orange-700 hover:bg-orange-200 rounded-lg shadow-sm transition-colors flex items-center gap-1"
+                  className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold bg-orange-100 text-orange-700 hover:bg-orange-200 rounded-lg shadow-sm transition-colors flex items-center gap-1"
                   disabled={targetMembers.filter(m => selectedCalendarTask.statuses[m.id] !== 'completed').length === 0}
                 >
-                  <Mail size={16} /> リマインド送信
+                  <Mail size={14} className="sm:w-[16px] sm:h-[16px]" /> リマインド送信
                 </button>
               ) : (
                 <div></div>
               )}
               <button 
                 onClick={() => {setShowCalendarTaskModal(false); setSelectedCalendarTask(null);}}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
+                className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
               >
                 閉じる
               </button>
