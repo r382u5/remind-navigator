@@ -28,6 +28,12 @@ const INITIAL_MEMBERS = [
   { id: 'm4', name: '川崎 健史', department: '閲覧者', role: 'viewer', email: 'kawasaki@example.com' }
 ];
 
+// スマホ・タブレット判定関数
+const isMobileDevice = () => {
+  if (typeof navigator === 'undefined') return false;
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+};
+
 export default function App() {
   const ENABLE_CROSS_HIGHLIGHT = false;
 
@@ -375,9 +381,15 @@ export default function App() {
     await setDoc(doc(db, 'tasks', newId), newTask);
     
     showToast(`「${newTaskTitle}」を追加しました`);
-    // Gmail（Web版）を別タブで起動
-    const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
-    window.open(gmailLink, '_blank');
+    
+    // PCとスマホでメール起動の方法を分ける
+    if (isMobileDevice()) {
+      const mailtoLink = `mailto:?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+      window.location.href = mailtoLink;
+    } else {
+      const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+      window.open(gmailLink, '_blank');
+    }
     
     setNewTaskTitle('');
     setNewTaskDueDate('');
@@ -409,11 +421,16 @@ export default function App() {
     const pendingMembers = targetMembers.filter(m => remindTask.statuses[m.id] !== 'completed');
     const toEmails = pendingMembers.map(m => m.email).filter(e => e).join(',');
     
-    // Gmail（Web版）を別タブで起動
-    const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(toEmails)}&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
-    window.open(gmailLink, '_blank');
+    // PCとスマホでメール起動の方法を分ける
+    if (isMobileDevice()) {
+      const mailtoLink = `mailto:${toEmails}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+      window.location.href = mailtoLink;
+    } else {
+      const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(toEmails)}&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+      window.open(gmailLink, '_blank');
+    }
     
-    showToast(`Gmailを起動しました`);
+    showToast(`メールソフトを起動しました`);
     setShowRemindModal(false);
     setRemindTask(null);
   };
