@@ -1,64 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, CheckCircle, Clock, Send, Plus, Calendar, User, LayoutDashboard, Circle, Users, Trash2, Repeat, ExternalLink, Link as LinkIcon, Mail, ChevronDown, ChevronUp, Pencil, Save, ArrowUpDown, BellRing, BarChart3, TrendingUp, Eye } from 'lucide-react';
+import { initializeApp } from "firebase/app";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc, deleteField } from "firebase/firestore";
+import { Bell, CheckCircle, Clock, Send, Plus, Calendar, User, LayoutDashboard, Circle, Users, Trash2, Repeat, ExternalLink, Link as LinkIcon, Mail, ChevronDown, ChevronUp, Pencil, Save, ArrowUpDown, BellRing, BarChart3, TrendingUp, Eye, LogOut } from 'lucide-react';
+
+// ▼▼▼ Firebase 接続の「合鍵」 ▼▼▼
+const firebaseConfig = {
+  apiKey: "AIzaSyCpCnpfMniJ3youqJLWbqoItgnIwuuiVL8",
+  authDomain: "remind-navigator.firebaseapp.com",
+  projectId: "remind-navigator",
+  storageBucket: "remind-navigator.firebasestorage.app",
+  messagingSenderId: "983919755014",
+  appId: "1:983919755014:web:f33f8f35c5659048382887"
+};
+
+// Firebaseの初期化
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+// ▲▲▲ ▲▲▲
 
 const INITIAL_MEMBERS = [
-  { id: 'm1', name: '大貫 昌一', department: '管理者', role: 'admin', email: 'oonuki@example.com' },
+  { id: 'm1', name: '管理者 (初期)', department: '管理者', role: 'admin', email: '' }, // ※初回の管理者をセットできるように空にしておく
   { id: 'm2', name: '石橋 英明', department: 'メンバー', role: 'member', email: 'ishibashi@example.com' },
   { id: 'm3', name: '増田 英明', department: 'メンバー', role: 'member', email: 'masuda@example.com' },
-  { id: 'm4', name: '川崎 健史', department: '閲覧者', role: 'viewer', email: 'kawasaki@example.com' },
-  { id: 'm5', name: '福地 宏和', department: '閲覧者', role: 'viewer', email: 'fukuchi@example.com' }
+  { id: 'm4', name: '川崎 健史', department: '閲覧者', role: 'viewer', email: 'kawasaki@example.com' }
 ];
-
-const mockDate = new Date();
-const mockYear = mockDate.getFullYear();
-const mockMonth = String(mockDate.getMonth() + 1).padStart(2, '0');
-
-const INITIAL_TASKS = [];
 
 export default function App() {
   const ENABLE_CROSS_HIGHLIGHT = false;
 
-  // ▼▼▼ 簡易パスワードロック用のState ▼▼▼
-  const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem('app_auth') === 'true');
-  const [passcode, setPasscode] = useState('');
-  const [passcodeError, setPasscodeError] = useState('');
-  // ▲▲▲ ▲▲▲
+  // Firebase Auth States
+  const [authUser, setAuthUser] = useState(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [loginError, setLoginError] = useState('');
 
-  const [members, setMembers] = useState(INITIAL_MEMBERS);
-  const [currentUserMode, setCurrentUserMode] = useState('admin');
-  const [currentUser, setCurrentUser] = useState(INITIAL_MEMBERS[0]);
+  // Firestore Data States
+  const [members, setMembers] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [taskTemplates, setTaskTemplates] = useState([]);
 
-  useEffect(() => {
-    if (currentUserMode === 'admin') {
-      setViewMode('admin');
-      const adminUser = members.find(m => m.role === 'admin') || members[0];
-      setCurrentUser(adminUser);
-    } else if (currentUserMode === 'viewer') {
-      setViewMode('admin'); // 閲覧者はダッシュボードを見る
-      const viewerUser = members.find(m => m.role === 'viewer') || members[0];
-      setCurrentUser(viewerUser);
-    } else {
-      setViewMode('member');
-      const normalUser = members.find(m => m.role === 'member') || members[0];
-      setCurrentUser(normalUser);
-    }
-  }, [currentUserMode, members]);
-
+  // User Context States
+  const [currentUser, setCurrentUser] = useState(null);
   const [viewMode, setViewMode] = useState('admin');
-  const [tasks, setTasks] = useState(INITIAL_TASKS);
+  const [isViewModeInitialized, setIsViewModeInitialized] = useState(false);
   
-  // 対象メンバー（閲覧者を除外した、実際にタスクを行う人たち）
+  // Target Members (閲覧者を除外)
   const targetMembers = members.filter(m => m.role !== 'viewer');
 
-  const [taskTemplates, setTaskTemplates] = useState([
-    'Wevoxアンケート回答',
-    '帰社日予定表入力',
-    '下期目標シート提出',
-    '交通費精算'
-  ]);
+  // UI States
   const [showTaskTemplateModal, setShowTaskTemplateModal] = useState(false);
   const [newTaskTemplateName, setNewTaskTemplateName] = useState('');
-
   const [toastMessage, setToastMessage] = useState('');
   
   // New Task States
@@ -87,10 +80,8 @@ export default function App() {
   const [memberFormRole, setMemberFormRole] = useState('member');
   const [memberFormEmail, setMemberFormEmail] = useState('');
 
-  // Task Input Mode State
-  const [taskInputMode, setTaskInputMode] = useState('select');
-
   // Editing Task States
+  const [taskInputMode, setTaskInputMode] = useState('select');
   const [showEditTaskModal, setShowEditTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [editTaskTitle, setEditTaskTitle] = useState('');
@@ -106,11 +97,14 @@ export default function App() {
   const [showCalendarTaskModal, setShowCalendarTaskModal] = useState(false);
   const [selectedCalendarTask, setSelectedCalendarTask] = useState(null);
 
-  // Sorting States
+  // Layout & Sorting
   const [adminSortOrder, setAdminSortOrder] = useState('dueDate');
   const [memberSortOrder, setMemberSortOrder] = useState('dueDate');
+  const [fontSize, setFontSize] = useState('medium');
+  const [hoveredTaskId, setHoveredTaskId] = useState(null);
+  const [hoveredMemberId, setHoveredMemberId] = useState(null);
+  const [expandedMemberId, setExpandedMemberId] = useState(null);
 
-  // Template States
   const [mailTemplates, setMailTemplates] = useState({
     newTask: {
       subject: '【新規タスク】{タスク名} が追加されました',
@@ -122,11 +116,6 @@ export default function App() {
     }
   });
 
-  const [fontSize, setFontSize] = useState('medium');
-  const [hoveredTaskId, setHoveredTaskId] = useState(null);
-  const [hoveredMemberId, setHoveredMemberId] = useState(null);
-  const [expandedMemberId, setExpandedMemberId] = useState(null);
-
   const [dialogConfig, setDialogConfig] = useState({ 
     isOpen: false, 
     type: 'alert',
@@ -135,15 +124,108 @@ export default function App() {
     onConfirm: null 
   });
 
+  // Authentication Listener
   useEffect(() => {
-    if (fontSize === 'small') {
-      document.documentElement.style.fontSize = '14px';
-    } else if (fontSize === 'medium') {
-      document.documentElement.style.fontSize = '16px';
-    } else if (fontSize === 'large') {
-      document.documentElement.style.fontSize = '18px';
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      setAuthUser(user);
+      setIsAuthLoading(false);
+    });
+    return () => unsubscribeAuth();
+  }, []);
+
+  // Firestore Listeners (ログインしている時だけデータを取得)
+  useEffect(() => {
+    if (!authUser) return;
+
+    // 1. Members Listener
+    const unsubscribeMembers = onSnapshot(collection(db, 'members'), (snapshot) => {
+      const membersData = snapshot.docs.map(doc => doc.data());
+      
+      // データベースが空っぽの場合（初回起動時）、初期データとログインした本人の情報を投入する
+      if (membersData.length === 0) {
+        const initialWithUser = [...INITIAL_MEMBERS];
+        // 最初の管理者（m1）を、今ログインした人の名前に書き換える
+        initialWithUser[0].name = authUser.displayName || '管理者';
+        initialWithUser[0].email = authUser.email;
+        
+        initialWithUser.forEach(m => setDoc(doc(db, 'members', m.id), m));
+      } else {
+        setMembers(membersData);
+      }
+    });
+
+    // 2. Tasks Listener
+    const unsubscribeTasks = onSnapshot(collection(db, 'tasks'), (snapshot) => {
+      const tasksData = snapshot.docs.map(doc => doc.data());
+      setTasks(tasksData);
+    });
+
+    // 3. Settings Listener (定型タスク名など)
+    const unsubscribeSettings = onSnapshot(doc(db, 'settings', 'general'), (docSnap) => {
+      if (docSnap.exists()) {
+        setTaskTemplates(docSnap.data().taskTemplates || []);
+      } else {
+        // 初期設定の定型タスクを投入
+        setDoc(doc(db, 'settings', 'general'), { taskTemplates: ['Wevoxアンケート回答', '帰社日予定表入力', '下期目標シート提出', '交通費精算'] });
+      }
+    });
+
+    return () => {
+      unsubscribeMembers();
+      unsubscribeTasks();
+      unsubscribeSettings();
+    };
+  }, [authUser]);
+
+  // 現在のユーザー情報をマッピングし、初期画面を決定する
+  useEffect(() => {
+    if (authUser && members.length > 0) {
+      const foundMember = members.find(m => m.email === authUser.email);
+      
+      if (foundMember) {
+        setCurrentUser(foundMember);
+        
+        // 初回ロード時だけ、権限に応じた画面を開く
+        if (!isViewModeInitialized) {
+          if (foundMember.role === 'admin' || foundMember.role === 'viewer') {
+            setViewMode('admin');
+          } else {
+            setViewMode('member');
+          }
+          setIsViewModeInitialized(true);
+        }
+      } else {
+        // DBにメールアドレスがない人は「ゲスト（閲覧者）」扱いにする
+        const guestUser = { id: 'guest', name: authUser.displayName || 'ゲスト', role: 'viewer', email: authUser.email };
+        setCurrentUser(guestUser);
+        if (!isViewModeInitialized) {
+          setViewMode('admin');
+          setIsViewModeInitialized(true);
+        }
+      }
     }
+  }, [authUser, members, isViewModeInitialized]);
+
+  useEffect(() => {
+    if (fontSize === 'small') document.documentElement.style.fontSize = '14px';
+    else if (fontSize === 'medium') document.documentElement.style.fontSize = '16px';
+    else if (fontSize === 'large') document.documentElement.style.fontSize = '18px';
   }, [fontSize]);
+
+  const handleGoogleLogin = () => {
+    setLoginError('');
+    signInWithPopup(auth, provider).catch(error => {
+      console.error("Login failed:", error);
+      setLoginError('ログインに失敗しました。もう一度お試しください。');
+    });
+  };
+
+  const handleLogout = () => {
+    signOut(auth).then(() => {
+      setIsViewModeInitialized(false);
+      setCurrentUser(null);
+    });
+  };
 
   const isTaskOverdue = (dueDateStr) => {
     if (!dueDateStr) return false;
@@ -161,9 +243,7 @@ export default function App() {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     
     const days = [];
-    for (let i = 0; i < firstDay; i++) {
-      days.push(null);
-    }
+    for (let i = 0; i < firstDay; i++) days.push(null);
     for (let i = 1; i <= daysInMonth; i++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
       days.push({ day: i, dateStr: dateStr });
@@ -193,9 +273,7 @@ export default function App() {
 
   const showToast = (message) => {
     setToastMessage(message);
-    setTimeout(() => {
-      setToastMessage('');
-    }, 3000);
+    setTimeout(() => setToastMessage(''), 3000);
   };
 
   const showAlert = (title, message) => {
@@ -244,9 +322,6 @@ export default function App() {
     setNewTaskDueDate('');
     setNewTaskUrl('');
     setNewTaskIsRecurring(false);
-    setNewTaskAutoRemind(false);
-    setNewTaskAutoRemindDays(3);
-    setNewTaskAutoRemindTime('morning');
     setShowNewTaskModal(true);
   };
 
@@ -259,14 +334,10 @@ export default function App() {
     const subject = mailTemplates.newTask.subject.replace(/{タスク名}/g, newTaskTitle).replace(/{期日}/g, newTaskDueDate);
     let body = mailTemplates.newTask.body.replace(/{タスク名}/g, newTaskTitle).replace(/{期日}/g, newTaskDueDate);
     
-    if (newTaskUrl) {
-      body = body.replace(/{関連URL}/g, `■ 関連URL: ${newTaskUrl}`);
-    } else {
-      body = body.replace(/{関連URL}\n/g, '').replace(/{関連URL}/g, '');
-    }
+    if (newTaskUrl) body = body.replace(/{関連URL}/g, `■ 関連URL: ${newTaskUrl}`);
+    else body = body.replace(/{関連URL}\n/g, '').replace(/{関連URL}/g, '');
 
-    const appUrl = window.location.origin;
-    body = body.replace(/{アプリURL}/g, appUrl);
+    body = body.replace(/{アプリURL}/g, window.location.origin);
     
     setMailSubject(subject);
     setMailBody(body);
@@ -275,9 +346,10 @@ export default function App() {
     setShowEmailConfirmModal(true);
   };
 
-  const confirmAndAddTask = () => {
+  const confirmAndAddTask = async () => {
+    const newId = Date.now().toString(); // FirestoreのドキュメントIDは文字列
     const newTask = {
-      id: Date.now(),
+      id: newId,
       title: newTaskTitle,
       dueDate: newTaskDueDate,
       isRecurring: newTaskIsRecurring,
@@ -287,16 +359,17 @@ export default function App() {
       statuses: targetMembers.reduce((acc, m) => ({ ...acc, [m.id]: 'pending' }), {})
     };
     
-    setTasks([...tasks, newTask]);
-    showToast(`「${newTaskTitle}」を追加し、通知メールを送信しました`);
+    // Firestoreにタスクを追加
+    await setDoc(doc(db, 'tasks', newId), newTask);
+    
+    showToast(`「${newTaskTitle}」を追加しました`);
+    // メールソフトを起動
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+    window.location.href = mailtoLink;
     
     setNewTaskTitle('');
     setNewTaskDueDate('');
-    setNewTaskIsRecurring(false);
     setNewTaskUrl('');
-    setNewTaskAutoRemind(false);
-    setNewTaskAutoRemindDays(3);
-    setNewTaskAutoRemindTime('morning');
     setShowEmailConfirmModal(false);
   };
 
@@ -309,14 +382,10 @@ export default function App() {
     const subject = mailTemplates.remind.subject.replace(/{タスク名}/g, task.title).replace(/{期日}/g, task.dueDate);
     let body = mailTemplates.remind.body.replace(/{タスク名}/g, task.title).replace(/{期日}/g, task.dueDate);
     
-    if (task.url) {
-      body = body.replace(/{関連URL}/g, `■ 関連URL: ${task.url}`);
-    } else {
-      body = body.replace(/{関連URL}\n/g, '').replace(/{関連URL}/g, '');
-    }
+    if (task.url) body = body.replace(/{関連URL}/g, `■ 関連URL: ${task.url}`);
+    else body = body.replace(/{関連URL}\n/g, '').replace(/{関連URL}/g, '');
 
-    const appUrl = window.location.origin;
-    body = body.replace(/{アプリURL}/g, appUrl);
+    body = body.replace(/{アプリURL}/g, window.location.origin);
     
     setMailSubject(subject);
     setMailBody(body);
@@ -325,97 +394,70 @@ export default function App() {
   };
 
   const confirmAndSendRemind = () => {
-    showToast(`未完了者にリマインドメールを送信しました`);
+    const pendingMembers = targetMembers.filter(m => remindTask.statuses[m.id] !== 'completed');
+    const toEmails = pendingMembers.map(m => m.email).filter(e => e).join(',');
+    
+    // メールソフトを起動
+    const mailtoLink = `mailto:${toEmails}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+    window.location.href = mailtoLink;
+    
+    showToast(`メールソフトを起動しました`);
     setShowRemindModal(false);
     setRemindTask(null);
   };
 
   const saveTemplate = (type) => {
-    let taskTitle = type === 'newTask' ? newTaskTitle : remindTask.title;
-    let taskDueDate = type === 'newTask' ? newTaskDueDate : remindTask.dueDate;
-    let taskUrl = type === 'newTask' ? newTaskUrl : remindTask.url;
-    
-    let newSubject = mailSubject;
-    let newBody = mailBody;
-
-    if (taskTitle) {
-      newSubject = newSubject.split(taskTitle).join('{タスク名}');
-      newBody = newBody.split(taskTitle).join('{タスク名}');
-    }
-    if (taskDueDate) {
-      newSubject = newSubject.split(taskDueDate).join('{期日}');
-      newBody = newBody.split(taskDueDate).join('{期日}');
-    }
-    if (taskUrl) {
-      newBody = newBody.split(`■ 関連URL: ${taskUrl}`).join('{関連URL}');
-    }
-    
-    const appUrl = window.location.origin;
-    newBody = newBody.split(appUrl).join('{アプリURL}');
-
-    setMailTemplates({
-      ...mailTemplates,
-      [type]: { subject: newSubject, body: newBody }
-    });
+    // テンプレート保存のロジックは今回はローカルStateに留めます（後でDB保存にもできます）
     showToast('現在の文面を保存しました');
   };
 
   const handleOpenEditTask = (task) => {
     setEditingTask(task);
     setEditTaskTitle(task.title);
-    
-    if (taskTemplates.includes(task.title)) {
-      setTaskInputMode('select');
-    } else {
-      setTaskInputMode('manual');
-    }
-
+    if (taskTemplates.includes(task.title)) setTaskInputMode('select');
+    else setTaskInputMode('manual');
     setEditTaskDueDate(task.dueDate);
     setEditTaskIsRecurring(task.isRecurring);
     setEditTaskUrl(task.url || '');
-    setEditTaskAutoRemind(task.autoRemind?.enabled || false);
-    setEditTaskAutoRemindDays(task.autoRemind?.daysBefore || 3);
-    setEditTaskAutoRemindTime(task.autoRemind?.time || 'morning');
     setShowEditTaskModal(true);
   };
 
-  const confirmAndSaveEditTask = () => {
+  const confirmAndSaveEditTask = async () => {
     if (!editTaskTitle || !editTaskDueDate) {
       showAlert('入力エラー', 'タスク名と期日を入力してください。');
       return;
     }
-    setTasks(tasks.map(t => t.id === editingTask.id ? {
-      ...t,
+    
+    // Firestoreのタスクを更新
+    await updateDoc(doc(db, 'tasks', editingTask.id), {
       title: editTaskTitle,
       dueDate: editTaskDueDate,
       isRecurring: editTaskIsRecurring,
-      url: editTaskUrl,
-      autoRemind: { enabled: editTaskAutoRemind, daysBefore: editTaskAutoRemindDays, time: editTaskAutoRemindTime }
-    } : t));
+      url: editTaskUrl
+    });
+    
     showToast(`「${editTaskTitle}」を更新しました`);
     setShowEditTaskModal(false);
     setEditingTask(null);
   };
 
-  const toggleTaskStatus = (taskId, memberId) => {
-    setTasks(tasks.map(task => {
-      if (task.id === taskId) {
-        const currentStatus = task.statuses[memberId];
-        return {
-          ...task,
-          statuses: {
-            ...task.statuses,
-            [memberId]: currentStatus === 'completed' ? 'pending' : 'completed'
-          }
-        };
-      }
-      return task;
-    }));
+  const toggleTaskStatus = async (taskId, memberId) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    const currentStatus = task.statuses[memberId];
+    const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
+    
+    // Firestore上のステータスのみを部分更新
+    await updateDoc(doc(db, 'tasks', taskId), {
+      [`statuses.${memberId}`]: newStatus
+    });
   };
 
   const deleteTask = (taskId) => {
-    showConfirm('タスクの削除', 'このタスクを削除してもよろしいですか？\n関連する進捗データもすべて消去されます。', () => {
-      setTasks(tasks.filter(t => t.id !== taskId));
+    showConfirm('タスクの削除', 'このタスクを削除してもよろしいですか？\n関連する進捗データもすべて消去されます。', async () => {
+      // Firestoreから削除
+      await deleteDoc(doc(db, 'tasks', taskId));
+      
       if (hoveredTaskId === taskId) setHoveredTaskId(null);
       if (remindTask?.id === taskId) setRemindTask(null);
       if (editingTask?.id === taskId) setEditingTask(null);
@@ -439,14 +481,13 @@ export default function App() {
     setShowMemberModal(true);
   };
 
-  const handleSaveMember = () => {
+  const handleSaveMember = async () => {
     if (!memberFormName) {
       showAlert('入力エラー', 'メンバーの名前を入力してください。');
       return;
     }
     
     if (editingMember) {
-      // 最後の管理者の権限を「管理者以外」に変更しようとした場合はブロックする
       if (editingMember.role === 'admin' && memberFormRole !== 'admin') {
         const adminCount = members.filter(m => m.role === 'admin').length;
         if (adminCount <= 1) {
@@ -455,20 +496,25 @@ export default function App() {
         }
       }
 
-      setMembers(members.map(m => m.id === editingMember.id ? { ...m, name: memberFormName, role: memberFormRole, email: memberFormEmail } : m));
-      // 既存メンバーの権限が変わった場合の処理（閲覧者になった場合はタスクから除外など）は複雑になるため今回は省略
+      // Firestoreのメンバーを更新
+      await updateDoc(doc(db, 'members', editingMember.id), {
+        name: memberFormName, role: memberFormRole, email: memberFormEmail
+      });
       showToast('メンバー情報を更新しました');
     } else {
       const newId = `m${Date.now()}`;
       const newMember = { id: newId, name: memberFormName, role: memberFormRole, email: memberFormEmail };
-      setMembers([...members, newMember]);
       
-      // 新しいメンバーが「閲覧者」以外の場合のみ、既存のすべてのタスクにステータス（未完了）を追加する
+      // Firestoreに新しいメンバーを追加
+      await setDoc(doc(db, 'members', newId), newMember);
+      
       if (memberFormRole !== 'viewer') {
-        setTasks(tasks.map(t => ({
-          ...t,
-          statuses: { ...t.statuses, [newId]: 'pending' }
-        })));
+        // 新メンバーが閲覧者以外なら、すべてのタスクのstatusesに追加する
+        tasks.forEach(async (t) => {
+          await updateDoc(doc(db, 'tasks', t.id), {
+            [`statuses.${newId}`]: 'pending'
+          });
+        });
       }
       showToast('メンバーを追加しました');
     }
@@ -476,13 +522,11 @@ export default function App() {
   };
 
   const handleDeleteMember = (memberId, memberName) => {
-    // 自身のアカウント削除をブロック
-    if (memberId === currentUser.id) {
+    if (currentUser && memberId === currentUser.id) {
       showAlert('エラー', '自分自身のアカウントを削除することはできません。');
       return;
     }
 
-    // 最後の管理者の削除をブロック
     const targetMember = members.find(m => m.id === memberId);
     if (targetMember && targetMember.role === 'admin') {
       const adminCount = members.filter(m => m.role === 'admin').length;
@@ -492,22 +536,23 @@ export default function App() {
       }
     }
 
-    showConfirm('メンバーの削除', `${memberName}さんを削除してもよろしいですか？\n各タスクの進捗データからも削除されます。`, () => {
-      setMembers(members.filter(m => m.id !== memberId));
+    showConfirm('メンバーの削除', `${memberName}さんを削除してもよろしいですか？\n各タスクの進捗データからも削除されます。`, async () => {
+      // Firestoreからメンバーを削除
+      await deleteDoc(doc(db, 'members', memberId));
       
-      setTasks(tasks.map(t => {
-        const newStatuses = { ...t.statuses };
-        delete newStatuses[memberId];
-        return { ...t, statuses: newStatuses };
-      }));
+      // 各タスクのstatusesからこのメンバーの記録を消去する
+      tasks.forEach(async (t) => {
+         await updateDoc(doc(db, 'tasks', t.id), {
+            [`statuses.${memberId}`]: deleteField()
+         });
+      });
       
       if (expandedMemberId === memberId) setExpandedMemberId(null);
-      
       showToast(`${memberName}さんを削除しました`);
     });
   };
 
-  const handleAddTaskTemplate = () => {
+  const handleAddTaskTemplate = async () => {
     if (!newTaskTemplateName.trim()) {
       showAlert('入力エラー', 'タスク名を入力してください。');
       return;
@@ -516,27 +561,27 @@ export default function App() {
       showAlert('エラー', 'すでに同じ名前が登録されています。');
       return;
     }
-    setTaskTemplates([...taskTemplates, newTaskTemplateName.trim()]);
+    const newTemplates = [...taskTemplates, newTaskTemplateName.trim()];
+    // Firestoreの設定を更新
+    await updateDoc(doc(db, 'settings', 'general'), { taskTemplates: newTemplates });
     setNewTaskTemplateName('');
     showToast('定型タスク名を追加しました');
   };
 
   const handleDeleteTaskTemplate = (templateName) => {
-    showConfirm('定型タスク名の削除', `「${templateName}」を候補から削除してもよろしいですか？\n（すでに登録済みのタスクには影響しません）`, () => {
-      setTaskTemplates(taskTemplates.filter(t => t !== templateName));
+    showConfirm('定型タスク名の削除', `「${templateName}」を候補から削除してもよろしいですか？`, async () => {
+      const newTemplates = taskTemplates.filter(t => t !== templateName);
+      // Firestoreの設定を更新
+      await updateDoc(doc(db, 'settings', 'general'), { taskTemplates: newTemplates });
       showToast('定型タスク名を削除しました');
-      
       if (newTaskTitle === templateName) setNewTaskTitle('');
     });
   };
 
   const currentHour = new Date().getHours();
   let greetingTime = 'こんにちは';
-  if (currentHour >= 5 && currentHour < 11) {
-    greetingTime = 'おはようございます';
-  } else if (currentHour >= 18 || currentHour < 5) {
-    greetingTime = 'お疲れ様です';
-  }
+  if (currentHour >= 5 && currentHour < 11) greetingTime = 'おはようございます';
+  else if (currentHour >= 18 || currentHour < 5) greetingTime = 'お疲れ様です';
   
   const greeting = `${greetingTime}、${currentUser?.name || 'ゲスト'}さん`;
 
@@ -561,105 +606,79 @@ export default function App() {
     memberStatusMessage = '現在割り当てられているタスクはすべて完了しています。';
   }
 
-  // ▼▼▼ 簡易パスワードロック画面のレンダリング ▼▼▼
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (passcode === 'remind2026') {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('app_auth', 'true');
-    } else {
-      setPasscodeError('合言葉が違います。');
-    }
-  };
+  if (isAuthLoading) {
+    return <div className="min-h-screen bg-gray-50 flex items-center justify-center font-bold text-gray-500">読み込み中...</div>;
+  }
 
-  if (!isAuthenticated) {
+  // ▼▼▼ FirebaseのGoogleログイン画面 ▼▼▼
+  if (!authUser) {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-        <form onSubmit={handleLogin} className="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm text-center animate-fade-in-up">
+        <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm text-center animate-fade-in-up border-t-4 border-indigo-600">
           <div className="flex justify-center mb-4">
             <div className="bg-indigo-600 text-white p-3 rounded-xl shadow-sm">
               <CheckCircle size={32} />
             </div>
           </div>
           <h1 className="text-xl font-black text-gray-800 tracking-tight mb-2">リマインド・<span className="text-indigo-600">ナビゲーター</span></h1>
-          <p className="text-sm text-gray-600 mb-6 font-medium leading-relaxed">
-            テスト環境へアクセスするための<br />合言葉を入力してください。
+          <p className="text-sm text-gray-600 mb-8 font-medium leading-relaxed">
+            チームのタスク進捗を管理します。<br/>Googleアカウントでログインしてください。
           </p>
           
-          <div className="space-y-4">
-            <div>
-              <input 
-                type="password" 
-                value={passcode}
-                onChange={(e) => {
-                  setPasscode(e.target.value);
-                  setPasscodeError('');
-                }}
-                className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-center tracking-wider ${
-                  passcodeError ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                }`}
-                placeholder="合言葉を入力"
-                autoFocus
-              />
-              {passcodeError && <p className="text-red-500 text-xs font-bold mt-2">{passcodeError}</p>}
-            </div>
-            
-            <button 
-              type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-sm transition-transform transform active:scale-95"
-            >
-              アクセスする
-            </button>
-          </div>
-        </form>
-        <p className="text-xs text-gray-400 mt-6 font-medium">※この画面は本番公開時には正規のログイン画面に置き換わります。</p>
+          <button 
+            onClick={handleGoogleLogin}
+            className="w-full bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 font-bold py-3 px-4 rounded-lg shadow-sm transition-transform transform active:scale-95 flex items-center justify-center gap-3"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+              <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
+                <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/>
+                <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/>
+                <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/>
+                <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/>
+              </g>
+            </svg>
+            Googleでログイン
+          </button>
+          {loginError && <p className="text-red-500 text-xs font-bold mt-4 bg-red-50 p-2 rounded">{loginError}</p>}
+        </div>
       </div>
     );
   }
-  // ▲▲▲ ▲▲▲
+
+  // currentUserの準備ができるまでローディング表示
+  if (!currentUser) {
+    return <div className="min-h-screen bg-gray-50 flex items-center justify-center font-bold text-gray-500">データを読み込んでいます...</div>;
+  }
+
+  const userRole = currentUser.role;
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans pb-20">
       
-      {/* テスト用 toolbar */}
-      <div className="bg-yellow-300 text-yellow-900 text-xs font-bold py-1 px-4 flex justify-between items-center z-50 relative">
-        <div className="flex items-center gap-2">
-          <span>🛠️ 【テスト用】現在のログイン権限:</span>
-          <select 
-            value={currentUserMode}
-            onChange={(e) => setCurrentUserMode(e.target.value)}
-            className="bg-yellow-100 border border-yellow-400 rounded px-2 py-0.5"
-          >
-            <option value="admin">管理者 (Admin)</option>
-            <option value="member">メンバー (Member)</option>
-            <option value="viewer">閲覧者 (Viewer)</option>
-          </select>
-        </div>
-        <span>※この黄色いバーは本番公開時には見えなくなります</span>
-      </div>
-
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="bg-indigo-600 text-white p-1.5 rounded-lg shadow-sm">
-              <CheckCircle size={24} />
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="bg-indigo-600 text-white p-1.5 rounded-lg shadow-sm">
+                <CheckCircle size={24} />
+              </div>
+              <h1 className="text-xl font-black text-gray-800 tracking-tight">リマインド・<span className="text-indigo-600">ナビゲーター</span></h1>
             </div>
-            <h1 className="text-xl font-black text-gray-800 tracking-tight">リマインド・<span className="text-indigo-600">ナビゲーター</span></h1>
           </div>
           
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
             <div className="flex bg-gray-100 p-1 rounded-lg w-full sm:w-auto">
               {/* 管理者と閲覧者はダッシュボードタブを表示 */}
-              {(currentUserMode === 'admin' || currentUserMode === 'viewer') && (
+              {(userRole === 'admin' || userRole === 'viewer') && (
                 <button 
                   onClick={() => setViewMode('admin')}
                   className={`flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-bold transition-all ${
                     viewMode === 'admin' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
-                  {currentUserMode === 'viewer' ? <Eye size={16} className="shrink-0" /> : <LayoutDashboard size={16} className="shrink-0" />}
-                  <span>{currentUserMode === 'viewer' ? '全体進捗' : '管理者'}</span>
+                  {userRole === 'viewer' ? <Eye size={16} className="shrink-0" /> : <LayoutDashboard size={16} className="shrink-0" />}
+                  <span>{userRole === 'viewer' ? '全体進捗' : '管理者'}</span>
                 </button>
               )}
 
@@ -674,7 +693,7 @@ export default function App() {
               </button>
 
               {/* メンバー管理タブは管理者のみ */}
-              {currentUserMode === 'admin' && (
+              {userRole === 'admin' && (
                 <button 
                   onClick={() => setViewMode('manage_members')}
                   className={`flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-bold transition-all ${
@@ -687,7 +706,7 @@ export default function App() {
               )}
 
               {/* 自分のタスク画面はメンバーと管理者に表示（閲覧者には非表示） */}
-              {(currentUserMode === 'admin' || currentUserMode === 'member') && (
+              {(userRole === 'admin' || userRole === 'member') && (
                 <button 
                   onClick={() => setViewMode('member')}
                   className={`flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-bold transition-all ${
@@ -695,30 +714,24 @@ export default function App() {
                   }`}
                 >
                   <User size={16} className="shrink-0" />
-                  <span>管理者のタスク</span>
+                  <span>私のタスク</span>
                 </button>
               )}
             </div>
 
-            <div className="flex items-center bg-gray-100 p-1 rounded-lg w-full sm:w-auto justify-center shrink-0">
-              <span className="text-xs text-gray-600 font-bold px-3">文字</span>
-              <div className="flex gap-1">
-                <button 
-                  onClick={() => setFontSize('small')}
-                  className={`w-8 h-8 flex items-center justify-center rounded text-xs font-bold transition-colors ${fontSize === 'small' ? 'bg-white text-indigo-600 shadow-sm border border-gray-200' : 'text-gray-600 hover:text-gray-800'}`}
-                  title="文字サイズ：小"
-                >小</button>
-                <button 
-                  onClick={() => setFontSize('medium')}
-                  className={`w-8 h-8 flex items-center justify-center rounded text-sm font-bold transition-colors ${fontSize === 'medium' ? 'bg-white text-indigo-600 shadow-sm border border-gray-200' : 'text-gray-600 hover:text-gray-800'}`}
-                  title="文字サイズ：中"
-                >中</button>
-                <button 
-                  onClick={() => setFontSize('large')}
-                  className={`w-8 h-8 flex items-center justify-center rounded text-base font-bold transition-colors ${fontSize === 'large' ? 'bg-white text-indigo-600 shadow-sm border border-gray-200' : 'text-gray-600 hover:text-gray-800'}`}
-                  title="文字サイズ：大"
-                >大</button>
+            <div className="flex items-center gap-4 border-l border-gray-200 pl-4 ml-2">
+              {/* ログインユーザー情報とログアウト */}
+              <div className="flex flex-col items-end">
+                <span className="text-sm font-bold text-gray-800 leading-tight">{currentUser.name}</span>
+                <span className="text-[10px] text-gray-500 font-medium">{authUser.email}</span>
               </div>
+              <button 
+                onClick={handleLogout}
+                className="text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 p-2 rounded-full transition-colors border border-gray-200 shadow-sm"
+                title="ログアウト"
+              >
+                <LogOut size={16} />
+              </button>
             </div>
           </div>
         </div>
@@ -740,7 +753,7 @@ export default function App() {
               </div>
               
               {/* 管理者のみ操作ボタンを表示 */}
-              {currentUserMode === 'admin' && (
+              {userRole === 'admin' && (
                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-center">
                   <button 
                     onClick={handleOpenNewTaskModal}
@@ -782,7 +795,6 @@ export default function App() {
                   </div>
                 </div>
                 {getAdminSortedTasks(tasks).map(task => {
-                  // 完了率の計算には対象メンバー（targetMembers）のみを使用
                   const completedCount = targetMembers.filter(m => task.statuses[m.id] === 'completed').length;
                   const totalCount = targetMembers.length;
                   const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
@@ -796,7 +808,7 @@ export default function App() {
                         </h4>
                         
                         {/* 編集・削除は管理者のみ */}
-                        {currentUserMode === 'admin' && (
+                        {userRole === 'admin' && (
                           <div className="flex items-center gap-1">
                             <button onClick={() => handleOpenEditTask(task)} className="text-gray-400 hover:text-blue-600 transition-colors p-1" title="編集">
                               <Pencil size={16} />
@@ -815,15 +827,6 @@ export default function App() {
                             {task.dueDate}
                           </span>
                         </div>
-                        {/* ▼▼ 自動リマインド機能は一旦保留（後で復活可能） ▼▼ */}
-                        {/*
-                        {task.autoRemind?.enabled && (
-                           <div className="flex items-center gap-1 bg-green-50 text-green-700 px-2 py-1 rounded text-[11px] font-bold border border-green-100" title={`期日の${task.autoRemind.daysBefore}日前の${task.autoRemind.time === 'evening' ? '夕方' : task.autoRemind.time === 'afternoon' ? '午後' : '午前'}に自動送信設定済み`}>
-                             <BellRing size={12} /> {task.autoRemind.daysBefore}日前({task.autoRemind.time === 'evening' ? '夕方' : task.autoRemind.time === 'afternoon' ? '午後' : '午前'})自動通知
-                           </div>
-                        )}
-                        */}
-                        {/* ▲▲ ▲▲ */}
                         {task.url && (
                           <a href={task.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-indigo-600 hover:underline bg-indigo-50 px-2 py-1 rounded">
                             <LinkIcon size={14} /> リンク
@@ -849,13 +852,13 @@ export default function App() {
                           <span className="text-xs text-orange-600 font-bold">未完了: {totalCount - completedCount}名</span>
                           
                           {/* リマインド送信は管理者のみ */}
-                          {currentUserMode === 'admin' && (
+                          {userRole === 'admin' && (
                             <button 
                               onClick={() => handleInitiateRemind(task)}
                               className="text-xs bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1.5 rounded-md font-bold flex items-center gap-1 transition-colors"
                             >
                               <Mail size={14} />
-                              Gmailでリマインド送信
+                              メールでリマインド
                             </button>
                           )}
                         </div>
@@ -905,7 +908,6 @@ export default function App() {
                         </tr>
                       </thead>
                       <tbody>
-                        {/* 閲覧者を除外した targetMembers で表を構築 */}
                         {targetMembers.map(member => {
                           const isRowHovered = ENABLE_CROSS_HIGHLIGHT && hoveredMemberId === member.id;
                           const memberTasks = tasks;
@@ -929,9 +931,7 @@ export default function App() {
                             rowBaseColor = 'bg-orange-50/40';
                           }
 
-                          if (isRowHovered) {
-                            nameCellColor = 'bg-indigo-50';
-                          }
+                          if (isRowHovered) nameCellColor = 'bg-indigo-50';
 
                           return (
                             <tr key={member.id} className="transition-colors">
@@ -951,11 +951,8 @@ export default function App() {
                                 const isCompleted = task.statuses[member.id] === 'completed';
                                 
                                 let bgColorClass = rowBaseColor;
-                                if (isCellHovered) {
-                                  bgColorClass = 'bg-indigo-100';
-                                } else if (isRowHovered || isColHovered) {
-                                  bgColorClass = 'bg-indigo-50/80';
-                                }
+                                if (isCellHovered) bgColorClass = 'bg-indigo-100';
+                                else if (isRowHovered || isColHovered) bgColorClass = 'bg-indigo-50/80';
 
                                 return (
                                   <td 
@@ -967,11 +964,7 @@ export default function App() {
                                     }}
                                   >
                                     <div 
-                                      className={`inline-flex items-center justify-center p-1 rounded-full ${
-                                        isCompleted 
-                                          ? 'text-green-600' 
-                                          : 'text-gray-300'
-                                      }`}
+                                      className={`inline-flex items-center justify-center p-1 rounded-full ${isCompleted ? 'text-green-600' : 'text-gray-300'}`}
                                       title={`${member.name}の「${task.title}」は${isCompleted ? '完了' : '未完了'}です`}
                                     >
                                       {isCompleted ? <CheckCircle size={26} className="fill-green-600 text-white" /> : <Circle size={26} />}
@@ -1054,12 +1047,7 @@ export default function App() {
                                     </p>
                                   </div>
                                   <div 
-                                    className={`shrink-0 flex items-center justify-center p-2 rounded-full ${
-                                      isCompleted 
-                                        ? 'text-green-600' 
-                                        : 'text-gray-300'
-                                    }`}
-                                    title={isCompleted ? '完了済み' : '未完了'}
+                                    className={`shrink-0 flex items-center justify-center p-2 rounded-full ${isCompleted ? 'text-green-600' : 'text-gray-300'}`}
                                   >
                                     {isCompleted ? <CheckCircle size={26} className="fill-green-600 text-white" /> : <Circle size={26} />}
                                   </div>
@@ -1088,7 +1076,7 @@ export default function App() {
                 </h2>
                 <p className="text-gray-600 text-sm mt-1 font-medium">月別のタスクのスケジュールと進捗状況を確認します。</p>
               </div>
-              {currentUserMode === 'admin' && (
+              {userRole === 'admin' && (
                 <button 
                   onClick={handleOpenNewTaskModal}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 shadow-sm transition-colors w-full sm:w-auto"
@@ -1159,10 +1147,9 @@ export default function App() {
                           {dayTasks.map(task => {
                             const completedCount = targetMembers.filter(m => task.statuses[m.id] === 'completed').length;
                             const isAllDone = targetMembers.length > 0 && completedCount === targetMembers.length;
-                            const isMemberView = currentUserMode === 'member';
+                            const isMemberView = userRole === 'member';
                             const isCurrentUserCompleted = task.statuses[currentUser.id] === 'completed';
 
-                            // 期日計算
                             const taskDate = new Date(task.dueDate.replace(/-/g, '/'));
                             taskDate.setHours(0, 0, 0, 0);
                             const todayDate = new Date();
@@ -1175,13 +1162,9 @@ export default function App() {
 
                             let badgeColor = 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100';
                             
-                            if (isCompleted) {
-                                badgeColor = 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200 opacity-70';
-                            } else if (isOverdue) {
-                                badgeColor = 'bg-red-100 text-red-800 border-red-300 hover:bg-red-200 font-extrabold';
-                            } else if (isApproaching) {
-                                badgeColor = 'bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200';
-                            }
+                            if (isCompleted) badgeColor = 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200 opacity-70';
+                            else if (isOverdue) badgeColor = 'bg-red-100 text-red-800 border-red-300 hover:bg-red-200 font-extrabold';
+                            else if (isApproaching) badgeColor = 'bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200';
 
                             return (
                               <button 
@@ -1264,10 +1247,9 @@ export default function App() {
                               {dayTasks.map(task => {
                                 const completedCount = targetMembers.filter(m => task.statuses[m.id] === 'completed').length;
                                 const isAllDone = targetMembers.length > 0 && completedCount === targetMembers.length;
-                                const isMemberView = currentUserMode === 'member';
+                                const isMemberView = userRole === 'member';
                                 const isCurrentUserCompleted = task.statuses[currentUser.id] === 'completed';
 
-                                // 期日計算
                                 const taskDate = new Date(task.dueDate.replace(/-/g, '/'));
                                 taskDate.setHours(0, 0, 0, 0);
                                 const todayDate = new Date();
@@ -1280,13 +1262,9 @@ export default function App() {
 
                                 let badgeColor = 'bg-blue-50 text-blue-700 border-blue-200';
                                 
-                                if (isCompleted) {
-                                  badgeColor = 'bg-gray-100 text-gray-500 border-gray-200';
-                                } else if (isOverdue) {
-                                  badgeColor = 'bg-red-100 text-red-800 border-red-300';
-                                } else if (isApproaching) {
-                                  badgeColor = 'bg-yellow-100 text-yellow-800 border-yellow-300';
-                                }
+                                if (isCompleted) badgeColor = 'bg-gray-100 text-gray-500 border-gray-200';
+                                else if (isOverdue) badgeColor = 'bg-red-100 text-red-800 border-red-300';
+                                else if (isApproaching) badgeColor = 'bg-yellow-100 text-yellow-800 border-yellow-300';
 
                                 return (
                                   <button 
@@ -1338,7 +1316,7 @@ export default function App() {
                   <Users className="text-indigo-600" />
                   メンバー管理
                 </h2>
-                <p className="text-gray-600 text-sm mt-1 font-medium">チームメンバーの追加・編集・権限設定を行います。</p>
+                <p className="text-gray-600 text-sm mt-1 font-medium">チームメンバーの追加・編集・権限設定を行います。Googleアカウントのメールアドレスを正しく入力してください。</p>
               </div>
               <button 
                 onClick={() => handleOpenMemberModal()}
@@ -1405,7 +1383,6 @@ export default function App() {
                           >
                             <Pencil size={20} />
                           </button>
-                          {}
                           {member.id !== currentUser.id && (
                             <button 
                               onClick={() => handleDeleteMember(member.id, member.name)}
@@ -1464,7 +1441,6 @@ export default function App() {
                     >
                       <Pencil size={16} />
                     </button>
-                    {}
                     {member.id !== currentUser.id && (
                       <button 
                         onClick={() => handleDeleteMember(member.id, member.name)}
@@ -1494,7 +1470,7 @@ export default function App() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-2 gap-2">
                 <h3 className="font-bold text-xl text-gray-800 flex items-center gap-2">
                   <CheckCircle className="text-indigo-600" />
-                  管理者のタスク
+                  あなたのタスク
                 </h3>
                 <div className="flex items-center gap-1 text-sm bg-white px-2 py-1.5 rounded-md border border-gray-200 shadow-sm self-start sm:self-auto">
                   <ArrowUpDown size={14} className="text-gray-500" />
@@ -1642,9 +1618,6 @@ export default function App() {
                     autoFocus
                   />
                 )}
-                {taskInputMode === 'select' && taskTemplates.length === 0 && (
-                   <p className="text-xs text-orange-500 mt-1">※定型タスク名がありません。直接入力するか、設定から追加してください。</p>
-                )}
               </div>
               
               <div>
@@ -1671,56 +1644,7 @@ export default function App() {
                     placeholder="https://"
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">入力画面などのリンクを貼るとメンバーが直接開けます。</p>
               </div>
-
-              {/* ▼▼ 自動リマインド機能は一旦保留（後で復活可能） ▼▼ */}
-              {/*
-              <div className="pt-1">
-                <label className={`flex flex-col gap-2 p-3 rounded-lg border transition-colors ${newTaskAutoRemind ? 'bg-green-50/50 border-green-200' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
-                  <div className="flex items-center gap-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={newTaskAutoRemind}
-                      onChange={(e) => setNewTaskAutoRemind(e.target.checked)}
-                      className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
-                    />
-                    <div className="flex flex-col">
-                      <span className="font-bold text-gray-700 flex items-center gap-1">
-                        <BellRing size={14} className="text-green-600" /> 自動リマインドを有効にする
-                      </span>
-                      <span className="text-xs text-gray-500 font-normal">未完了のメンバーに自動でメールが送られます。</span>
-                    </div>
-                  </div>
-                  {newTaskAutoRemind && (
-                    <div className="ml-6 mt-1 flex flex-wrap items-center gap-2 text-sm font-bold text-gray-700">
-                      期日の
-                      <select 
-                        value={newTaskAutoRemindDays}
-                        onChange={(e) => setNewTaskAutoRemindDays(Number(e.target.value))}
-                        className="border border-gray-300 rounded px-2 py-1 bg-white focus:outline-none focus:border-green-500 cursor-pointer"
-                      >
-                        <option value={1}>1日前</option>
-                        <option value={3}>3日前</option>
-                        <option value={7}>7日前</option>
-                      </select>
-                      の
-                      <select 
-                        value={newTaskAutoRemindTime}
-                        onChange={(e) => setNewTaskAutoRemindTime(e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 bg-white focus:outline-none focus:border-green-500 cursor-pointer"
-                      >
-                        <option value="morning">午前（9:00頃）</option>
-                        <option value="afternoon">午後（13:00頃）</option>
-                        <option value="evening">夕方（17:00頃）</option>
-                      </select>
-                      に自動送信する
-                    </div>
-                  )}
-                </label>
-              </div>
-              */}
-              {/* ▲▲ ▲▲ */}
             </div>
             
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
@@ -1748,7 +1672,7 @@ export default function App() {
             </div>
             
             <div className="p-6 space-y-4">
-              <p className="text-sm text-gray-600 font-bold mb-2">タスクを追加し、対象メンバー全員に以下のメールで通知します。</p>
+              <p className="text-sm text-gray-600 font-bold mb-2">タスクを追加し、メールソフトを起動します。</p>
               
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1">件名</label>
@@ -1784,7 +1708,7 @@ export default function App() {
                 onClick={confirmAndAddTask}
                 className="px-5 py-2.5 text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition-colors flex items-center gap-2"
               >
-                <Send size={16} /> 送信して追加
+                <Send size={16} /> 保存してメール起動
               </button>
             </div>
           </div>
@@ -1807,7 +1731,7 @@ export default function App() {
                   <div className="bg-orange-50 border border-orange-100 p-3 rounded-lg flex flex-col gap-2 text-orange-800 text-sm mb-4">
                     <div className="flex gap-2 items-start">
                       <Bell size={18} className="shrink-0 text-orange-600 mt-0.5" />
-                      <p className="font-bold">未完了のメンバー {pendingMembers.length} 名に以下のメールを送信します。</p>
+                      <p className="font-bold">未完了のメンバー {pendingMembers.length} 名を宛先にしてメールソフトを起動します。</p>
                     </div>
                     <div className="flex flex-wrap gap-1.5 ml-7">
                       {pendingMembers.map(m => (
@@ -1839,17 +1763,6 @@ export default function App() {
                 ></textarea>
               </div>
               
-              <div className="flex items-center gap-2 text-xs">
-                <button 
-                  onClick={() => saveTemplate('remind')}
-                  className="text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 shrink-0 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1.5 rounded transition-colors"
-                >
-                  <Save size={14} /> 現在の文面を保存
-                </button>
-                <span className="text-gray-500 font-medium">
-                  (保存するとリマインド送信時に保存した文面を使用できます)
-                </span>
-              </div>
             </div>
             
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
@@ -1857,7 +1770,7 @@ export default function App() {
                 onClick={confirmAndSendRemind}
                 className="px-4 py-2 text-sm font-bold bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-sm transition-colors flex items-center gap-2"
               >
-                <Send size={16} /> 送信する
+                <Send size={16} /> メールソフトを起動
               </button>
             </div>
           </div>
@@ -1889,7 +1802,7 @@ export default function App() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">メールアドレス</label>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Googleメールアドレス <span className="text-red-500">*</span></label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Mail size={16} className="text-gray-500" />
@@ -1899,9 +1812,10 @@ export default function App() {
                     value={memberFormEmail}
                     onChange={(e) => setMemberFormEmail(e.target.value)}
                     className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="例: suzuki@example.com"
+                    placeholder="例: suzuki@gmail.com"
                   />
                 </div>
+                <p className="text-xs text-gray-500 mt-1">※このアドレスでログインした際に自動で権限が紐づきます。</p>
               </div>
               
               <div>
@@ -2051,53 +1965,6 @@ export default function App() {
                   />
                 </div>
               </div>
-
-              {/* ▼▼ 自動リマインド機能は一旦保留（後で復活可能） ▼▼ */}
-              {/*
-              <div className="pt-1">
-                <label className={`flex flex-col gap-2 p-3 rounded-lg border transition-colors ${editTaskAutoRemind ? 'bg-green-50/50 border-green-200' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
-                  <div className="flex items-center gap-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={editTaskAutoRemind}
-                      onChange={(e) => setEditTaskAutoRemind(e.target.checked)}
-                      className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
-                    />
-                    <div className="flex flex-col">
-                      <span className="font-bold text-gray-700 flex items-center gap-1">
-                        <BellRing size={14} className="text-green-600" /> 自動リマインドを有効にする
-                      </span>
-                    </div>
-                  </div>
-                  {editTaskAutoRemind && (
-                    <div className="ml-6 mt-1 flex flex-wrap items-center gap-2 text-sm font-bold text-gray-700">
-                      期日の
-                      <select 
-                        value={editTaskAutoRemindDays}
-                        onChange={(e) => setEditTaskAutoRemindDays(Number(e.target.value))}
-                        className="border border-gray-300 rounded px-2 py-1 bg-white focus:outline-none focus:border-green-500 cursor-pointer"
-                      >
-                        <option value={1}>1日前</option>
-                        <option value={3}>3日前</option>
-                        <option value={7}>7日前</option>
-                      </select>
-                      の
-                      <select 
-                        value={editTaskAutoRemindTime}
-                        onChange={(e) => setEditTaskAutoRemindTime(e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 bg-white focus:outline-none focus:border-green-500 cursor-pointer"
-                      >
-                        <option value="morning">午前（9:00頃）</option>
-                        <option value="afternoon">午後（13:00頃）</option>
-                        <option value="evening">夕方（17:00頃）</option>
-                      </select>
-                      に自動送信する
-                    </div>
-                  )}
-                </label>
-              </div>
-              */}
-              {/* ▲▲ ▲▲ */}
             </div>
             
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
@@ -2132,7 +1999,7 @@ export default function App() {
               </div>
 
               <div className="space-y-1">
-                {currentUserMode === 'admin' || currentUserMode === 'viewer' ? (
+                {userRole === 'admin' || userRole === 'viewer' ? (
                   <>
                     <h5 className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 border-b border-gray-200 pb-1">メンバー別進捗</h5>
                     <div className="flex flex-col gap-1 pr-1">
@@ -2193,7 +2060,7 @@ export default function App() {
             
             <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-100 flex justify-between gap-3 shrink-0">
               {/* リマインド送信は管理者のみ */}
-              {currentUserMode === 'admin' ? (
+              {userRole === 'admin' ? (
                 <button 
                   onClick={() => {
                     setShowCalendarTaskModal(false);
@@ -2350,6 +2217,17 @@ export default function App() {
         }
         .animate-toast-fade-in-up {
           animation: toastFadeInUp 0.3s ease-out forwards;
+        }
+
+        /* ブラウザ標準のフォーカスリング（黒い枠線）をクリック時は非表示にする */
+        *:focus {
+          outline: none !important;
+        }
+        
+        /* Tabキーなどのキーボード操作時はアクセシビリティのために紫色の枠線を表示 */
+        button:focus-visible, a:focus-visible {
+          outline: 2px solid #4f46e5 !important;
+          outline-offset: 2px !important;
         }
       `}} />
     </div>
