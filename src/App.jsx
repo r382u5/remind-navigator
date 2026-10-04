@@ -446,6 +446,15 @@ export default function App() {
     }
     
     if (editingMember) {
+      // 最後の管理者の権限を「管理者以外」に変更しようとした場合はブロックする
+      if (editingMember.role === 'admin' && memberFormRole !== 'admin') {
+        const adminCount = members.filter(m => m.role === 'admin').length;
+        if (adminCount <= 1) {
+          showAlert('エラー', 'システムに最低1人の管理者がいる必要があります。最後の管理者の権限を外すことはできません。');
+          return;
+        }
+      }
+
       setMembers(members.map(m => m.id === editingMember.id ? { ...m, name: memberFormName, role: memberFormRole, email: memberFormEmail } : m));
       // 既存メンバーの権限が変わった場合の処理（閲覧者になった場合はタスクから除外など）は複雑になるため今回は省略
       showToast('メンバー情報を更新しました');
@@ -467,6 +476,22 @@ export default function App() {
   };
 
   const handleDeleteMember = (memberId, memberName) => {
+    // 自身のアカウント削除をブロック
+    if (memberId === currentUser.id) {
+      showAlert('エラー', '自分自身のアカウントを削除することはできません。');
+      return;
+    }
+
+    // 最後の管理者の削除をブロック
+    const targetMember = members.find(m => m.id === memberId);
+    if (targetMember && targetMember.role === 'admin') {
+      const adminCount = members.filter(m => m.role === 'admin').length;
+      if (adminCount <= 1) {
+        showAlert('エラー', 'システムに最低1人の管理者がいる必要があります。最後の管理者は削除できません。');
+        return;
+      }
+    }
+
     showConfirm('メンバーの削除', `${memberName}さんを削除してもよろしいですか？\n各タスクの進捗データからも削除されます。`, () => {
       setMembers(members.filter(m => m.id !== memberId));
       
@@ -1380,13 +1405,16 @@ export default function App() {
                           >
                             <Pencil size={20} />
                           </button>
-                          <button 
-                            onClick={() => handleDeleteMember(member.id, member.name)}
-                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="削除"
-                          >
-                            <Trash2 size={20} />
-                          </button>
+                          {}
+                          {member.id !== currentUser.id && (
+                            <button 
+                              onClick={() => handleDeleteMember(member.id, member.name)}
+                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="削除"
+                            >
+                              <Trash2 size={20} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -1436,12 +1464,15 @@ export default function App() {
                     >
                       <Pencil size={16} />
                     </button>
-                    <button 
-                      onClick={() => handleDeleteMember(member.id, member.name)}
-                      className="p-2 text-gray-500 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-lg transition-colors border border-gray-100 shadow-sm"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    {}
+                    {member.id !== currentUser.id && (
+                      <button 
+                        onClick={() => handleDeleteMember(member.id, member.name)}
+                        className="p-2 text-gray-500 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-lg transition-colors border border-gray-100 shadow-sm"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
