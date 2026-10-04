@@ -373,8 +373,8 @@ export default function App() {
     
     showToast(`「${newTaskTitle}」を追加しました`);
     // メールソフトを起動
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
-    window.location.href = mailtoLink;
+    const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+    window.open(gmailLink, '_blank');
     
     setNewTaskTitle('');
     setNewTaskDueDate('');
@@ -407,8 +407,8 @@ export default function App() {
     const toEmails = pendingMembers.map(m => m.email).filter(e => e).join(',');
     
     // メールソフトを起動
-    const mailtoLink = `mailto:${toEmails}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
-    window.location.href = mailtoLink;
+    const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(toEmails)}&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+    window.open(gmailLink, '_blank');
     
     showToast(`メールソフトを起動しました`);
     setShowRemindModal(false);
