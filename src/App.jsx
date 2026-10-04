@@ -372,7 +372,7 @@ export default function App() {
     await setDoc(doc(db, 'tasks', newId), newTask);
     
     showToast(`「${newTaskTitle}」を追加しました`);
-    // メールソフトを起動
+    // Gmail（Web版）を別タブで起動
     const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
     window.open(gmailLink, '_blank');
     
@@ -406,11 +406,11 @@ export default function App() {
     const pendingMembers = targetMembers.filter(m => remindTask.statuses[m.id] !== 'completed');
     const toEmails = pendingMembers.map(m => m.email).filter(e => e).join(',');
     
-    // メールソフトを起動
+    // Gmail（Web版）を別タブで起動
     const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(toEmails)}&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
     window.open(gmailLink, '_blank');
     
-    showToast(`メールソフトを起動しました`);
+    showToast(`Gmailを起動しました`);
     setShowRemindModal(false);
     setRemindTask(null);
   };
