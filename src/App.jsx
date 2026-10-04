@@ -382,12 +382,15 @@ export default function App() {
     
     showToast(`「${newTaskTitle}」を追加しました`);
     
+    // 宛先を生成（閲覧者を除く全対象メンバー）
+    const toEmails = targetMembers.map(m => m.email).filter(e => e).join(',');
+    
     // PCとスマホでメール起動の方法を分ける
     if (isMobileDevice()) {
-      const mailtoLink = `mailto:?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+      const mailtoLink = `mailto:${toEmails}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
       window.location.href = mailtoLink;
     } else {
-      const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+      const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(toEmails)}&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
       window.open(gmailLink, '_blank');
     }
     
