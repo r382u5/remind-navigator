@@ -433,7 +433,7 @@ export default function App() {
       window.open(gmailLink, '_blank');
     }
     
-    showToast(`メールソフトを起動しました`);
+    showToast(`Gmailを起動しました`);
     setShowRemindModal(false);
     setRemindTask(null);
   };
@@ -901,7 +901,7 @@ export default function App() {
                               className="text-xs bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1.5 rounded-md font-bold flex items-center gap-1 transition-colors"
                             >
                               <Mail size={14} />
-                              メールでリマインド
+                              Gmailでリマインド
                             </button>
                           )}
                         </div>
@@ -1715,7 +1715,7 @@ export default function App() {
             </div>
             
             <div className="p-6 space-y-4">
-              <p className="text-sm text-gray-600 font-bold mb-2">タスクを追加し、メールソフトを起動します。</p>
+              <p className="text-sm text-gray-600 font-bold mb-2">タスクを追加し、Gmailを起動します。</p>
               
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1">件名</label>
@@ -1751,7 +1751,7 @@ export default function App() {
                 onClick={confirmAndAddTask}
                 className="px-5 py-2.5 text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition-colors flex items-center gap-2"
               >
-                <Send size={16} /> 保存してメール起動
+                <Send size={16} /> 保存してGmail起動
               </button>
             </div>
           </div>
@@ -1774,7 +1774,7 @@ export default function App() {
                   <div className="bg-orange-50 border border-orange-100 p-3 rounded-lg flex flex-col gap-2 text-orange-800 text-sm mb-4">
                     <div className="flex gap-2 items-start">
                       <Bell size={18} className="shrink-0 text-orange-600 mt-0.5" />
-                      <p className="font-bold">未完了のメンバー {pendingMembers.length} 名を宛先にしてメールソフトを起動します。</p>
+                      <p className="font-bold">未完了のメンバー {pendingMembers.length} 名を宛先にしてGmailを起動します。</p>
                     </div>
                     <div className="flex flex-wrap gap-1.5 ml-7">
                       {pendingMembers.map(m => (
@@ -1813,7 +1813,7 @@ export default function App() {
                 onClick={confirmAndSendRemind}
                 className="px-4 py-2 text-sm font-bold bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-sm transition-colors flex items-center gap-2"
               >
-                <Send size={16} /> メールソフトを起動
+                <Send size={16} /> Gmailを起動
               </button>
             </div>
           </div>
