@@ -651,7 +651,7 @@ export default function App() {
           </div>
           <h1 className="text-xl font-black text-gray-800 tracking-tight mb-2">リマインド・<span className="text-indigo-600">ナビゲーター</span></h1>
           <p className="text-sm text-gray-600 mb-8 font-medium leading-relaxed">
-            チームのタスク進捗を管理します。<br/>Googleアカウントでログインしてください。
+            チームのタスク進捗を管理します。<br/>自社Googleアカウントでログインしてください。
           </p>
           
           <button 
