@@ -70,6 +70,7 @@ export default function App() {
   const [newTaskUrl, setNewTaskUrl] = useState('');
   const [newTaskAutoRemind, setNewTaskAutoRemind] = useState(false);
   const [newTaskAutoRemindDays, setNewTaskAutoRemindDays] = useState(3);
+  const [newTaskAutoRemindTime, setNewTaskAutoRemindTime] = useState('morning');
 
   // Remind States
   const [showRemindModal, setShowRemindModal] = useState(false);
@@ -98,6 +99,7 @@ export default function App() {
   const [editTaskUrl, setEditTaskUrl] = useState('');
   const [editTaskAutoRemind, setEditTaskAutoRemind] = useState(false);
   const [editTaskAutoRemindDays, setEditTaskAutoRemindDays] = useState(3);
+  const [editTaskAutoRemindTime, setEditTaskAutoRemindTime] = useState('morning');
 
   // Calendar States
   const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
@@ -112,11 +114,11 @@ export default function App() {
   const [mailTemplates, setMailTemplates] = useState({
     newTask: {
       subject: '【新規タスク】{タスク名} が追加されました',
-      body: 'メンバー各位\n\nお疲れ様です。\n新しいタスクが追加されました。期日までのご対応をお願いいたします。\n\n■ タスク: {タスク名}\n■ 期限: {期日}\n\n👇 以下のURLからタスク管理画面を開いて確認してください。'
+      body: 'メンバー各位\n\nお疲れ様です。\n新しいタスクが追加されました。期日までのご対応をお願いいたします。\n\n■ タスク: {タスク名}\n■ 期限: {期日}\n{関連URL}\n👇 対応が終わりましたら、以下のURLから管理画面を開き「完了」ボタンを押してください。\n{アプリURL}'
     },
     remind: {
       subject: '【リマインド】{タスク名} のご対応をお願いします',
-      body: 'お疲れ様です。\n以下のタスクが未完了となっております。\n期日が迫っておりますので、ご対応をお願いいたします。\n\n■ タスク: {タスク名}\n■ 期限: {期日}\n\n👇 対応が終わりましたら、以下のURLから「完了」ボタンを押してください。'
+      body: 'お疲れ様です。\n以下のタスクが未完了となっております。\n期日が迫っておりますので、ご対応をお願いいたします。\n\n■ タスク: {タスク名}\n■ 期限: {期日}\n{関連URL}\n👇 対応が終わりましたら、以下のURLから「完了」ボタンを押してください。\n{アプリURL}'
     }
   });
 
@@ -244,6 +246,7 @@ export default function App() {
     setNewTaskIsRecurring(false);
     setNewTaskAutoRemind(false);
     setNewTaskAutoRemindDays(3);
+    setNewTaskAutoRemindTime('morning');
     setShowNewTaskModal(true);
   };
 
@@ -254,7 +257,16 @@ export default function App() {
     }
     
     const subject = mailTemplates.newTask.subject.replace(/{タスク名}/g, newTaskTitle).replace(/{期日}/g, newTaskDueDate);
-    const body = mailTemplates.newTask.body.replace(/{タスク名}/g, newTaskTitle).replace(/{期日}/g, newTaskDueDate);
+    let body = mailTemplates.newTask.body.replace(/{タスク名}/g, newTaskTitle).replace(/{期日}/g, newTaskDueDate);
+    
+    if (newTaskUrl) {
+      body = body.replace(/{関連URL}/g, `■ 関連URL: ${newTaskUrl}`);
+    } else {
+      body = body.replace(/{関連URL}\n/g, '').replace(/{関連URL}/g, '');
+    }
+
+    const appUrl = window.location.origin;
+    body = body.replace(/{アプリURL}/g, appUrl);
     
     setMailSubject(subject);
     setMailBody(body);
@@ -270,7 +282,7 @@ export default function App() {
       dueDate: newTaskDueDate,
       isRecurring: newTaskIsRecurring,
       url: newTaskUrl,
-      autoRemind: { enabled: newTaskAutoRemind, daysBefore: newTaskAutoRemindDays },
+      autoRemind: { enabled: newTaskAutoRemind, daysBefore: newTaskAutoRemindDays, time: newTaskAutoRemindTime },
       // 閲覧者以外の対象メンバーにのみステータスを割り当てる
       statuses: targetMembers.reduce((acc, m) => ({ ...acc, [m.id]: 'pending' }), {})
     };
@@ -284,6 +296,7 @@ export default function App() {
     setNewTaskUrl('');
     setNewTaskAutoRemind(false);
     setNewTaskAutoRemindDays(3);
+    setNewTaskAutoRemindTime('morning');
     setShowEmailConfirmModal(false);
   };
 
@@ -294,7 +307,16 @@ export default function App() {
     setRemindTask(task);
     
     const subject = mailTemplates.remind.subject.replace(/{タスク名}/g, task.title).replace(/{期日}/g, task.dueDate);
-    const body = mailTemplates.remind.body.replace(/{タスク名}/g, task.title).replace(/{期日}/g, task.dueDate);
+    let body = mailTemplates.remind.body.replace(/{タスク名}/g, task.title).replace(/{期日}/g, task.dueDate);
+    
+    if (task.url) {
+      body = body.replace(/{関連URL}/g, `■ 関連URL: ${task.url}`);
+    } else {
+      body = body.replace(/{関連URL}\n/g, '').replace(/{関連URL}/g, '');
+    }
+
+    const appUrl = window.location.origin;
+    body = body.replace(/{アプリURL}/g, appUrl);
     
     setMailSubject(subject);
     setMailBody(body);
@@ -311,6 +333,7 @@ export default function App() {
   const saveTemplate = (type) => {
     let taskTitle = type === 'newTask' ? newTaskTitle : remindTask.title;
     let taskDueDate = type === 'newTask' ? newTaskDueDate : remindTask.dueDate;
+    let taskUrl = type === 'newTask' ? newTaskUrl : remindTask.url;
     
     let newSubject = mailSubject;
     let newBody = mailBody;
@@ -323,6 +346,12 @@ export default function App() {
       newSubject = newSubject.split(taskDueDate).join('{期日}');
       newBody = newBody.split(taskDueDate).join('{期日}');
     }
+    if (taskUrl) {
+      newBody = newBody.split(`■ 関連URL: ${taskUrl}`).join('{関連URL}');
+    }
+    
+    const appUrl = window.location.origin;
+    newBody = newBody.split(appUrl).join('{アプリURL}');
 
     setMailTemplates({
       ...mailTemplates,
@@ -346,6 +375,7 @@ export default function App() {
     setEditTaskUrl(task.url || '');
     setEditTaskAutoRemind(task.autoRemind?.enabled || false);
     setEditTaskAutoRemindDays(task.autoRemind?.daysBefore || 3);
+    setEditTaskAutoRemindTime(task.autoRemind?.time || 'morning');
     setShowEditTaskModal(true);
   };
 
@@ -360,7 +390,7 @@ export default function App() {
       dueDate: editTaskDueDate,
       isRecurring: editTaskIsRecurring,
       url: editTaskUrl,
-      autoRemind: { enabled: editTaskAutoRemind, daysBefore: editTaskAutoRemindDays }
+      autoRemind: { enabled: editTaskAutoRemind, daysBefore: editTaskAutoRemindDays, time: editTaskAutoRemindTime }
     } : t));
     showToast(`「${editTaskTitle}」を更新しました`);
     setShowEditTaskModal(false);
@@ -686,20 +716,20 @@ export default function App() {
               
               {/* 管理者のみ操作ボタンを表示 */}
               {currentUserMode === 'admin' && (
-                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                  <button 
-                    onClick={() => setShowTaskTemplateModal(true)}
-                    className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 shadow-sm transition-colors w-full sm:w-auto"
-                  >
-                    <Pencil size={18} />
-                    <span>定型タスク名の編集</span>
-                  </button>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-center">
                   <button 
                     onClick={handleOpenNewTaskModal}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 shadow-sm transition-colors w-full sm:w-auto"
                   >
                     <Plus size={20} />
                     <span>新しいタスクを追加</span>
+                  </button>
+                  <button 
+                    onClick={() => setShowTaskTemplateModal(true)}
+                    className="bg-transparent hover:bg-gray-100 border border-gray-300 text-gray-600 px-3 py-1.5 rounded-lg text-sm font-bold flex items-center justify-center gap-1.5 transition-colors w-full sm:w-auto"
+                  >
+                    <Pencil size={16} />
+                    <span>定型タスク編集</span>
                   </button>
                 </div>
               )}
@@ -760,11 +790,15 @@ export default function App() {
                             {task.dueDate}
                           </span>
                         </div>
+                        {/* ▼▼ 自動リマインド機能は一旦保留（後で復活可能） ▼▼ */}
+                        {/*
                         {task.autoRemind?.enabled && (
-                           <div className="flex items-center gap-1 bg-green-50 text-green-700 px-2 py-1 rounded text-[11px] font-bold border border-green-100" title={`期日の${task.autoRemind.daysBefore}日前に自動送信設定済み`}>
-                             <BellRing size={12} /> {task.autoRemind.daysBefore}日前自動通知
+                           <div className="flex items-center gap-1 bg-green-50 text-green-700 px-2 py-1 rounded text-[11px] font-bold border border-green-100" title={`期日の${task.autoRemind.daysBefore}日前の${task.autoRemind.time === 'evening' ? '夕方' : task.autoRemind.time === 'afternoon' ? '午後' : '午前'}に自動送信設定済み`}>
+                             <BellRing size={12} /> {task.autoRemind.daysBefore}日前({task.autoRemind.time === 'evening' ? '夕方' : task.autoRemind.time === 'afternoon' ? '午後' : '午前'})自動通知
                            </div>
                         )}
+                        */}
+                        {/* ▲▲ ▲▲ */}
                         {task.url && (
                           <a href={task.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-indigo-600 hover:underline bg-indigo-50 px-2 py-1 rounded">
                             <LinkIcon size={14} /> リンク
@@ -1609,6 +1643,8 @@ export default function App() {
                 <p className="text-xs text-gray-500 mt-1">入力画面などのリンクを貼るとメンバーが直接開けます。</p>
               </div>
 
+              {/* ▼▼ 自動リマインド機能は一旦保留（後で復活可能） ▼▼ */}
+              {/*
               <div className="pt-1">
                 <label className={`flex flex-col gap-2 p-3 rounded-lg border transition-colors ${newTaskAutoRemind ? 'bg-green-50/50 border-green-200' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
                   <div className="flex items-center gap-2 cursor-pointer">
@@ -1626,7 +1662,7 @@ export default function App() {
                     </div>
                   </div>
                   {newTaskAutoRemind && (
-                    <div className="ml-6 mt-1 flex items-center gap-2 text-sm font-bold text-gray-700">
+                    <div className="ml-6 mt-1 flex flex-wrap items-center gap-2 text-sm font-bold text-gray-700">
                       期日の
                       <select 
                         value={newTaskAutoRemindDays}
@@ -1637,11 +1673,23 @@ export default function App() {
                         <option value={3}>3日前</option>
                         <option value={7}>7日前</option>
                       </select>
+                      の
+                      <select 
+                        value={newTaskAutoRemindTime}
+                        onChange={(e) => setNewTaskAutoRemindTime(e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 bg-white focus:outline-none focus:border-green-500 cursor-pointer"
+                      >
+                        <option value="morning">午前（9:00頃）</option>
+                        <option value="afternoon">午後（13:00頃）</option>
+                        <option value="evening">夕方（17:00頃）</option>
+                      </select>
                       に自動送信する
                     </div>
                   )}
                 </label>
               </div>
+              */}
+              {/* ▲▲ ▲▲ */}
             </div>
             
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
@@ -1973,6 +2021,8 @@ export default function App() {
                 </div>
               </div>
 
+              {/* ▼▼ 自動リマインド機能は一旦保留（後で復活可能） ▼▼ */}
+              {/*
               <div className="pt-1">
                 <label className={`flex flex-col gap-2 p-3 rounded-lg border transition-colors ${editTaskAutoRemind ? 'bg-green-50/50 border-green-200' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
                   <div className="flex items-center gap-2 cursor-pointer">
@@ -1989,7 +2039,7 @@ export default function App() {
                     </div>
                   </div>
                   {editTaskAutoRemind && (
-                    <div className="ml-6 mt-1 flex items-center gap-2 text-sm font-bold text-gray-700">
+                    <div className="ml-6 mt-1 flex flex-wrap items-center gap-2 text-sm font-bold text-gray-700">
                       期日の
                       <select 
                         value={editTaskAutoRemindDays}
@@ -2000,11 +2050,23 @@ export default function App() {
                         <option value={3}>3日前</option>
                         <option value={7}>7日前</option>
                       </select>
+                      の
+                      <select 
+                        value={editTaskAutoRemindTime}
+                        onChange={(e) => setEditTaskAutoRemindTime(e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 bg-white focus:outline-none focus:border-green-500 cursor-pointer"
+                      >
+                        <option value="morning">午前（9:00頃）</option>
+                        <option value="afternoon">午後（13:00頃）</option>
+                        <option value="evening">夕方（17:00頃）</option>
+                      </select>
                       に自動送信する
                     </div>
                   )}
                 </label>
               </div>
+              */}
+              {/* ▲▲ ▲▲ */}
             </div>
             
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
