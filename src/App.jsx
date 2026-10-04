@@ -35,6 +35,7 @@ export default function App() {
   const [authUser, setAuthUser] = useState(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [loginError, setLoginError] = useState('');
+  const [accessDeniedError, setAccessDeniedError] = useState('');
 
   // Firestore Data States
   const [members, setMembers] = useState([]);
@@ -184,6 +185,7 @@ export default function App() {
       
       if (foundMember) {
         setCurrentUser(foundMember);
+        setAccessDeniedError('');
         
         // 初回ロード時だけ、権限に応じた画面を開く
         if (!isViewModeInitialized) {
@@ -195,13 +197,13 @@ export default function App() {
           setIsViewModeInitialized(true);
         }
       } else {
-        // DBにメールアドレスがない人は「ゲスト（閲覧者）」扱いにする
-        const guestUser = { id: 'guest', name: authUser.displayName || 'ゲスト', role: 'viewer', email: authUser.email };
-        setCurrentUser(guestUser);
-        if (!isViewModeInitialized) {
-          setViewMode('admin');
-          setIsViewModeInitialized(true);
-        }
+        // DBにメールアドレスがない人は弾く（強制ログアウトしてエラー表示）
+        signOut(auth).then(() => {
+          setAuthUser(null);
+          setCurrentUser(null);
+          setIsViewModeInitialized(false);
+          setAccessDeniedError(`【アクセス拒否】\n${authUser.email} はこのアプリに登録されていません。\n管理者に招待を依頼してください。`);
+        });
       }
     }
   }, [authUser, members, isViewModeInitialized]);
@@ -214,6 +216,7 @@ export default function App() {
 
   const handleGoogleLogin = () => {
     setLoginError('');
+    setAccessDeniedError('');
     signInWithPopup(auth, provider).catch(error => {
       console.error("Login failed:", error);
       
@@ -648,6 +651,13 @@ export default function App() {
             </svg>
             Googleでログイン
           </button>
+          
+          {accessDeniedError && (
+             <div className="mt-4 bg-red-50 p-4 rounded text-left border border-red-300 shadow-sm">
+               <p className="text-red-700 text-xs font-bold whitespace-pre-wrap leading-relaxed">{accessDeniedError}</p>
+             </div>
+          )}
+
           {loginError && (
              <div className="mt-4 bg-red-50 p-4 rounded text-left border border-red-200">
                <p className="text-red-700 text-xs font-bold whitespace-pre-wrap leading-relaxed">{loginError}</p>
