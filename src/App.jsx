@@ -216,7 +216,16 @@ export default function App() {
     setLoginError('');
     signInWithPopup(auth, provider).catch(error => {
       console.error("Login failed:", error);
-      setLoginError('ログインに失敗しました。もう一度お試しください。');
+      
+      // auth/unauthorized-domain エラーの場合は、詳細メッセージからドメインを抽出する
+      if (error.code === 'auth/unauthorized-domain') {
+        const errorMsg = error.message || '';
+        // "This domain (example.com) is not authorized" のようなメッセージからドメインを抽出する試み
+        // または、コンソールに表示されるフルエラーメッセージをユーザーに見せる
+        setLoginError(`【ドメイン未承認エラー】\nFirebaseでこのURLからのログインが許可されていません。\n以下のドメインをコピーして、Firebaseの「Authentication」>「設定」>「承認済みドメイン」に追加してください。\n\n追加するドメインの候補:\n・ ${window.location.hostname}\n・ ${window.location.hostname.replace('sandbox', 'googleusercontent')}\n\n※上記を追加してもダメな場合、ブラウザの「新しいタブで開く」アイコンから別画面で開き、そのURLのドメイン（最初の/まで）を追加してください。`);
+      } else {
+        setLoginError(`ログインに失敗しました。(${error.code})\nもう一度お試しください。`);
+      }
     });
   };
 
@@ -614,7 +623,7 @@ export default function App() {
   if (!authUser) {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm text-center animate-fade-in-up border-t-4 border-indigo-600">
+        <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center animate-fade-in-up border-t-4 border-indigo-600">
           <div className="flex justify-center mb-4">
             <div className="bg-indigo-600 text-white p-3 rounded-xl shadow-sm">
               <CheckCircle size={32} />
@@ -639,7 +648,11 @@ export default function App() {
             </svg>
             Googleでログイン
           </button>
-          {loginError && <p className="text-red-500 text-xs font-bold mt-4 bg-red-50 p-2 rounded">{loginError}</p>}
+          {loginError && (
+             <div className="mt-4 bg-red-50 p-4 rounded text-left border border-red-200">
+               <p className="text-red-700 text-xs font-bold whitespace-pre-wrap leading-relaxed">{loginError}</p>
+             </div>
+          )}
         </div>
       </div>
     );
