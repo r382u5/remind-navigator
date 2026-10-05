@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc, deleteField } from "firebase/firestore";
-import { Bell, CheckCircle, Clock, Send, Plus, Calendar, User, LayoutDashboard, Circle, Users, Trash2, Repeat, ExternalLink, Link as LinkIcon, Mail, ChevronDown, ChevronUp, Pencil, Save, ArrowUpDown, BellRing, BarChart3, TrendingUp, Eye, LogOut } from 'lucide-react';
+import { Bell, CheckCircle, Clock, Send, Plus, Calendar, User, LayoutDashboard, Circle, Users, Trash2, Repeat, ExternalLink, Link as LinkIcon, Mail, ChevronDown, ChevronUp, Pencil, Save, ArrowUpDown, BellRing, BarChart3, TrendingUp, Eye, LogOut, Download } from 'lucide-react';
 
 // ▼▼▼ Firebase 接続の「合鍵」 ▼▼▼
 const firebaseConfig = {
@@ -280,6 +280,52 @@ export default function App() {
     const newDate = new Date(currentCalendarDate);
     newDate.setMonth(newDate.getMonth() + 1);
     setCurrentCalendarDate(newDate);
+  };
+
+  const exportToCSV = () => {
+    // 1. ヘッダー行の作成
+    const headers = ['タスク名', '期日', '全体進捗'];
+    targetMembers.forEach(m => headers.push(m.name));
+    
+    // 2. データ行の作成
+    const sortedTasks = getAdminSortedTasks(tasks);
+    const rows = sortedTasks.map(task => {
+      const completedCount = targetMembers.filter(m => task.statuses[m.id] === 'completed').length;
+      const progressStr = `${completedCount}/${targetMembers.length}名`;
+      
+      // ダブルクォーテーションで囲む（タスク名にカンマが含まれていても崩れないようにするため）
+      const row = [
+        `"${task.title}"`,
+        `"${task.dueDate}"`,
+        `"${progressStr}"`
+      ];
+      
+      targetMembers.forEach(m => {
+        row.push(task.statuses[m.id] === 'completed' ? '完了' : '未完了');
+      });
+      return row.join(',');
+    });
+    
+    // 3. CSV文字列の結合（\uFEFF はExcelでの文字化けを防ぐためのBOMです）
+    const csvContent = '\uFEFF' + headers.join(',') + '\n' + rows.join('\n');
+    
+    // 4. ダウンロード処理
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
+    link.setAttribute('download', `タスク進捗データ_${dateStr}.csv`);
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    setIsProfileMenuOpen(false);
+    showToast('CSVデータをダウンロードしました');
   };
 
   const showConfirm = (title, message, onConfirmCallback) => {
@@ -800,6 +846,18 @@ export default function App() {
                 <div className="text-sm font-bold text-gray-800 truncate">{currentUser.name}</div>
                 <div className="text-[10px] text-gray-500 truncate mt-0.5">{authUser.email}</div>
               </div>
+              
+              {/* CSVダウンロードボタン (管理者と閲覧者のみ表示) */}
+              {(userRole === 'admin' || userRole === 'viewer') && (
+                <button 
+                  onClick={exportToCSV}
+                  className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 flex items-center gap-2 text-sm font-bold transition-colors border-b border-gray-100"
+                >
+                  <Download size={16} />
+                  CSVをダウンロード
+                </button>
+              )}
+              
               <button 
                 onClick={() => {
                   setIsProfileMenuOpen(false);
