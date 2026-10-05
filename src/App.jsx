@@ -60,6 +60,7 @@ export default function App() {
   const [showTaskTemplateModal, setShowTaskTemplateModal] = useState(false);
   const [newTaskTemplateName, setNewTaskTemplateName] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   
   // New Task States
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
@@ -694,52 +695,66 @@ export default function App() {
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans pb-20">
       
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex flex-col sm:flex-row items-center gap-3">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row justify-between items-center gap-3 sm:gap-4">
+          
+          {/* 上段：ロゴ ＆ (スマホ用プロフィール) */}
+          <div className="flex justify-between items-center w-full md:w-auto">
             <div className="flex items-center gap-2">
               <div className="bg-indigo-600 text-white p-1.5 rounded-lg shadow-sm">
                 <CheckCircle size={24} />
               </div>
               <h1 className="text-xl font-black text-gray-800 tracking-tight">リマインド・<span className="text-indigo-600">ナビゲーター</span></h1>
             </div>
+
+            {/* スマホ用プロフィールアイコン (md未満で表示) */}
+            <div className="md:hidden relative">
+              <button 
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold shadow-sm transition-transform active:scale-95"
+              >
+                {currentUser.name.charAt(0)}
+              </button>
+            </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-            <div className="flex bg-gray-100 p-1 rounded-lg w-full sm:w-auto">
+          {/* 下段：メニュータブ ＆ (PC用プロフィール) */}
+          <div className="flex items-center w-full md:w-auto">
+            {/* メニュータブ (スマホ時は2x2グリッド、PC時は横1列) */}
+            <div className="grid grid-cols-2 md:flex bg-gray-100 p-1 rounded-lg w-full md:w-auto gap-1">
               {/* 管理者と閲覧者はダッシュボードタブを表示 */}
               {(userRole === 'admin' || userRole === 'viewer') && (
                 <button 
                   onClick={() => setViewMode('admin')}
-                  className={`flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-bold transition-all ${
+                  className={`flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-md text-xs sm:text-sm font-bold transition-all ${
                     viewMode === 'admin' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
                   {userRole === 'viewer' ? <Eye size={16} className="shrink-0" /> : <LayoutDashboard size={16} className="shrink-0" />}
-                  <span>{userRole === 'viewer' ? '全体進捗' : '管理者'}</span>
+                  <span className="truncate">{userRole === 'viewer' ? '全体進捗' : '管理者'}</span>
                 </button>
               )}
 
               <button 
                 onClick={() => setViewMode('calendar')}
-                className={`flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-bold transition-all ${
+                className={`flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-md text-xs sm:text-sm font-bold transition-all ${
                   viewMode === 'calendar' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-600 hover:text-gray-800'
                 }`}
               >
                 <Calendar size={16} className="shrink-0" />
-                <span>カレンダー</span>
+                <span className="truncate">カレンダー</span>
               </button>
 
               {/* メンバー管理タブは管理者のみ */}
               {userRole === 'admin' && (
                 <button 
                   onClick={() => setViewMode('manage_members')}
-                  className={`flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-bold transition-all ${
+                  className={`flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-md text-xs sm:text-sm font-bold transition-all ${
                     viewMode === 'manage_members' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
                   <Users size={16} className="shrink-0" />
-                  <span className="whitespace-nowrap">メンバー管理</span>
+                  <span className="truncate">メンバー管理</span>
                 </button>
               )}
 
@@ -747,32 +762,57 @@ export default function App() {
               {(userRole === 'admin' || userRole === 'member') && (
                 <button 
                   onClick={() => setViewMode('member')}
-                  className={`flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-bold transition-all ${
+                  className={`flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-md text-xs sm:text-sm font-bold transition-all ${
                     viewMode === 'member' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
                   <User size={16} className="shrink-0" />
-                  <span>私のタスク</span>
+                  <span className="truncate">私のタスク</span>
                 </button>
               )}
             </div>
 
-            <div className="flex items-center gap-4 border-l border-gray-200 pl-4 ml-2">
-              {/* ログインユーザー情報とログアウト */}
-              <div className="flex flex-col items-end">
-                <span className="text-sm font-bold text-gray-800 leading-tight">{currentUser.name}</span>
-                <span className="text-[10px] text-gray-500 font-medium">{authUser.email}</span>
-              </div>
+            {/* PC用プロフィール (md以上で表示) */}
+            <div className="hidden md:flex relative border-l border-gray-200 pl-4 ml-4 items-center">
               <button 
-                onClick={handleLogout}
-                className="text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 p-2 rounded-full transition-colors border border-gray-200 shadow-sm"
-                title="ログアウト"
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <LogOut size={16} />
+                <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold shadow-sm shrink-0">
+                  {currentUser.name.charAt(0)}
+                </div>
+                <div className="flex flex-col items-start text-left">
+                  <span className="text-sm font-bold text-gray-800 leading-tight truncate max-w-[120px]">{currentUser.name}</span>
+                  <span className="text-[10px] text-gray-500 font-medium truncate max-w-[120px]">{authUser.email}</span>
+                </div>
+                <ChevronDown size={14} className="text-gray-400" />
               </button>
             </div>
           </div>
         </div>
+
+        {/* プロフィール ドロップダウンメニュー (スマホ・PC共通) */}
+        {isProfileMenuOpen && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setIsProfileMenuOpen(false)}></div>
+            <div className="absolute right-4 top-14 md:top-16 mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden animate-fade-in-up">
+              <div className="md:hidden px-4 py-3 border-b border-gray-100 bg-gray-50">
+                <div className="text-sm font-bold text-gray-800 truncate">{currentUser.name}</div>
+                <div className="text-[10px] text-gray-500 truncate mt-0.5">{authUser.email}</div>
+              </div>
+              <button 
+                onClick={() => {
+                  setIsProfileMenuOpen(false);
+                  handleLogout();
+                }}
+                className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 flex items-center gap-2 text-sm font-bold transition-colors"
+              >
+                <LogOut size={16} />
+                ログアウト
+              </button>
+            </div>
+          </>
+        )}
       </header>
 
       {/* Main Content View */}
