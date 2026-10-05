@@ -854,13 +854,13 @@ export default function App() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* 左カラム：タスク一覧 */}
               <div className="lg:col-span-1 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-2 gap-2">
-                  <h3 className="font-bold text-gray-700 flex items-center gap-2">
-                    <Clock size={18} />
-                    管理中のタスク
+                <div className="flex flex-row items-center justify-between border-b border-gray-200 pb-2 gap-2">
+                  <h3 className="font-bold text-lg text-gray-800 flex items-center gap-1.5 sm:gap-2">
+                    <Clock size={18} className="text-gray-600" />
+                    <span className="truncate">管理中のタスク</span>
                   </h3>
-                  <div className="flex items-center gap-1 text-sm bg-white px-2 py-1.5 rounded-md border border-gray-200 shadow-sm self-start sm:self-auto">
-                    <ArrowUpDown size={14} className="text-gray-500" />
+                  <div className="flex items-center gap-1 text-xs sm:text-sm bg-white px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-md border border-gray-200 shadow-sm shrink-0">
+                    <ArrowUpDown size={14} className="text-gray-500 hidden sm:block" />
                     <select 
                       value={adminSortOrder}
                       onChange={(e) => setAdminSortOrder(e.target.value)}
@@ -1545,13 +1545,13 @@ export default function App() {
             </div>
 
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-2 gap-2">
-                <h3 className="font-bold text-xl text-gray-800 flex items-center gap-2">
-                  <CheckCircle className="text-indigo-600" />
-                  進行中のタスク
+              <div className="flex flex-row items-center justify-between border-b border-gray-200 pb-2 gap-2">
+                <h3 className="font-bold text-lg text-gray-800 flex items-center gap-1.5 sm:gap-2">
+                  <CheckCircle size={18} className="text-indigo-600" />
+                  <span className="truncate">進行中のタスク</span>
                 </h3>
-                <div className="flex items-center gap-1 text-sm bg-white px-2 py-1.5 rounded-md border border-gray-200 shadow-sm self-start sm:self-auto">
-                  <ArrowUpDown size={14} className="text-gray-500" />
+                <div className="flex items-center gap-1 text-xs sm:text-sm bg-white px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-md border border-gray-200 shadow-sm shrink-0">
+                  <ArrowUpDown size={14} className="text-gray-500 hidden sm:block" />
                   <select 
                     value={memberSortOrder}
                     onChange={(e) => setMemberSortOrder(e.target.value)}
