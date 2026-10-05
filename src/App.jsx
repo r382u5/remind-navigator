@@ -879,7 +879,15 @@ export default function App() {
                   const isAllDone = totalCount > 0 && completedCount === totalCount;
 
                   return (
-                    <div key={task.id} className={`bg-white rounded-xl shadow-sm border-l-4 p-4 hover:shadow-md transition-shadow ${isAllDone ? 'border-green-500 opacity-75' : 'border-indigo-500'}`}>
+                    <div 
+                      key={task.id} 
+                      onClick={() => {
+                        setSelectedCalendarTask(task);
+                        setShowCalendarTaskModal(true);
+                      }}
+                      className={`bg-white rounded-xl shadow-sm border-l-4 p-4 hover:shadow-md cursor-pointer hover:bg-gray-50 transition-all ${isAllDone ? 'border-green-500 opacity-75' : 'border-indigo-500'}`}
+                      title="クリックして詳細を確認"
+                    >
                       <div className="flex justify-between items-start mb-2">
                         <h4 className="font-bold text-gray-800 leading-tight flex items-center gap-1.5">
                           {task.title}
@@ -888,10 +896,10 @@ export default function App() {
                         {/* 編集・削除は管理者のみ */}
                         {userRole === 'admin' && (
                           <div className="flex items-center gap-1">
-                            <button onClick={() => handleOpenEditTask(task)} className="text-gray-400 hover:text-blue-600 transition-colors p-1" title="編集">
+                            <button onClick={(e) => { e.stopPropagation(); handleOpenEditTask(task); }} className="text-gray-400 hover:text-blue-600 transition-colors p-1" title="編集">
                               <Pencil size={16} />
                             </button>
-                            <button onClick={() => deleteTask(task.id)} className="text-gray-400 hover:text-red-500 transition-colors p-1" title="削除">
+                            <button onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }} className="text-gray-400 hover:text-red-500 transition-colors p-1" title="削除">
                               <Trash2 size={16} />
                             </button>
                           </div>
@@ -906,7 +914,7 @@ export default function App() {
                           </span>
                         </div>
                         {task.url && (
-                          <a href={task.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-indigo-600 hover:underline bg-indigo-50 px-2 py-1 rounded">
+                          <a onClick={(e) => e.stopPropagation()} href={task.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-indigo-600 hover:underline bg-indigo-50 px-2 py-1 rounded">
                             <LinkIcon size={14} /> リンク
                           </a>
                         )}
@@ -932,7 +940,7 @@ export default function App() {
                           {/* リマインド送信は管理者のみ */}
                           {userRole === 'admin' && (
                             <button 
-                              onClick={() => handleInitiateRemind(task)}
+                              onClick={(e) => { e.stopPropagation(); handleInitiateRemind(task); }}
                               className="text-xs bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1.5 rounded-md font-bold flex items-center gap-1 transition-colors"
                             >
                               <Mail size={14} />
