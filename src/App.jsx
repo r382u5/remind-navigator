@@ -1513,7 +1513,7 @@ export default function App() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-2 gap-2">
                 <h3 className="font-bold text-xl text-gray-800 flex items-center gap-2">
                   <CheckCircle className="text-indigo-600" />
-                  あなたのタスク
+                  進行中のタスク
                 </h3>
                 <div className="flex items-center gap-1 text-sm bg-white px-2 py-1.5 rounded-md border border-gray-200 shadow-sm self-start sm:self-auto">
                   <ArrowUpDown size={14} className="text-gray-500" />
