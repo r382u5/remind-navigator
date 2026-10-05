@@ -610,12 +610,7 @@ export default function App() {
     });
   };
 
-  const currentHour = new Date().getHours();
-  let greetingTime = 'こんにちは';
-  if (currentHour >= 5 && currentHour < 11) greetingTime = 'おはようございます';
-  else if (currentHour >= 18 || currentHour < 5) greetingTime = 'お疲れ様です';
-  
-  const greeting = `${greetingTime}、${currentUser?.name || 'ゲスト'}さん`;
+  const greeting = `${currentUser?.name || 'ゲスト'} さん`;
 
   const currentUserTasks = currentUser && currentUser.role !== 'viewer' ? getMemberSortedTasks(tasks, currentUser.id) : [];
   const currentUserCompletedCount = currentUserTasks.filter(t => t.statuses[currentUser.id] === 'completed').length;
