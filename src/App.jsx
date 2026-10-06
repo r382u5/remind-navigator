@@ -944,36 +944,36 @@ export default function App() {
                         setSelectedCalendarTask(task);
                         setShowCalendarTaskModal(true);
                       }}
-                      className={`bg-white rounded-xl shadow-sm border-l-4 p-4 hover:shadow-md cursor-pointer hover:bg-gray-50 transition-all ${isAllDone ? 'border-green-500 opacity-75' : 'border-indigo-500'}`}
+                      className={`bg-white rounded-xl shadow-sm border-l-4 p-3 hover:shadow-md cursor-pointer hover:bg-gray-50 transition-all ${isAllDone ? 'border-green-500 opacity-75' : 'border-indigo-500'}`}
                       title="クリックして詳細を確認"
                     >
-                      <div className="flex justify-between items-start mb-2">
+                      <div className="flex justify-between items-start mb-1.5">
                         <h4 className="font-bold text-gray-800 leading-tight flex items-center gap-1.5">
                           {task.title}
                         </h4>
                         
                         {/* 編集・削除は管理者のみ */}
                         {userRole === 'admin' && (
-                          <div className="flex items-center gap-1">
-                            <button onClick={(e) => { e.stopPropagation(); handleOpenEditTask(task); }} className="text-gray-400 hover:text-blue-600 transition-colors p-2" title="編集">
+                          <div className="flex items-center gap-1 -mt-1 -mr-1">
+                            <button onClick={(e) => { e.stopPropagation(); handleOpenEditTask(task); }} className="text-gray-400 hover:text-blue-600 transition-colors p-1.5" title="編集">
                               <Pencil size={22} />
                             </button>
-                            <button onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }} className="text-gray-400 hover:text-red-500 transition-colors p-2" title="削除">
+                            <button onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }} className="text-gray-400 hover:text-red-500 transition-colors p-1.5" title="削除">
                               <Trash2 size={22} />
                             </button>
                           </div>
                         )}
                       </div>
                       
-                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 mb-3">
-                        <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
+                      <div className="flex flex-wrap items-center gap-2.5 text-sm text-gray-600 mb-2">
+                        <div className="flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded">
                           <Calendar size={14} />
                           <span className={isTaskOverdue(task.dueDate) && !isAllDone ? 'text-red-600 font-bold' : ''}>
                             {task.dueDate}
                           </span>
                         </div>
                         {task.url && (
-                          <a onClick={(e) => e.stopPropagation()} href={task.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-indigo-600 hover:underline bg-indigo-50 px-2 py-1 rounded">
+                          <a onClick={(e) => e.stopPropagation()} href={task.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-indigo-600 hover:underline bg-indigo-50 px-2 py-0.5 rounded">
                             <LinkIcon size={14} /> リンク
                           </a>
                         )}
@@ -984,23 +984,23 @@ export default function App() {
                           <span>完了状況</span>
                           <span className={isAllDone ? 'text-green-600 font-bold' : ''}>{completedCount} / {totalCount} 名</span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-gray-200 rounded-full h-1.5">
                           <div 
-                            className={`h-2 rounded-full ${isAllDone ? 'bg-green-500' : 'bg-indigo-500'}`} 
+                            className={`h-1.5 rounded-full ${isAllDone ? 'bg-green-500' : 'bg-indigo-500'}`} 
                             style={{ width: `${progress}%` }}
                           ></div>
                         </div>
                       </div>
 
                       {!isAllDone && (
-                        <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
+                        <div className="mt-2.5 pt-2.5 border-t border-gray-100 flex justify-between items-center">
                           <span className="text-xs text-orange-600 font-bold">未完了: {totalCount - completedCount}名</span>
                           
                           {/* リマインド送信は管理者のみ */}
                           {userRole === 'admin' && (
                             <button 
                               onClick={(e) => { e.stopPropagation(); handleInitiateRemind(task); }}
-                              className="text-xs bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1.5 rounded-md font-bold flex items-center gap-1 transition-colors"
+                              className="text-xs bg-orange-100 hover:bg-orange-200 text-orange-700 px-2.5 py-1 rounded-md font-bold flex items-center gap-1 transition-colors"
                             >
                               <Mail size={14} />
                               Gmailでリマインド
