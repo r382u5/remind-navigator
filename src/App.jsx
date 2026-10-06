@@ -1709,12 +1709,12 @@ export default function App() {
       {showNewTaskModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden flex flex-col">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h3 className="font-bold text-lg text-gray-800">新しいタスクを追加</h3>
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h3 className="font-bold text-base sm:text-lg text-gray-800">新しいタスクを追加</h3>
               <button onClick={() => setShowNewTaskModal(false)} className="text-gray-400 hover:text-gray-600 p-2 text-xl font-bold leading-none">✕</button>
             </div>
             
-            <div className="p-6 space-y-4 overflow-y-auto">
+            <div className="p-4 sm:p-6 space-y-4 overflow-y-auto">
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="block text-sm font-bold text-gray-700">タスク名 <span className="text-red-500">*</span></label>
@@ -1792,7 +1792,7 @@ export default function App() {
               </div>
             </div>
             
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
               <button 
                 onClick={handleInitiateAddTask}
                 className="px-6 py-2.5 text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition-colors flex items-center gap-2"
@@ -1940,14 +1940,14 @@ export default function App() {
       {showMemberModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden flex flex-col">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h3 className="font-bold text-lg text-gray-800">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h3 className="font-bold text-base sm:text-lg text-gray-800">
                 {editingMember ? 'メンバーを編集' : '新しいメンバーを追加'}
               </h3>
               <button onClick={() => setShowMemberModal(false)} className="text-gray-400 hover:text-gray-600 p-2 text-xl font-bold leading-none">✕</button>
             </div>
             
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-6 space-y-4">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1">名前 <span className="text-red-500">*</span></label>
                 <input 
@@ -2026,7 +2026,7 @@ export default function App() {
               </div>
             </div>
             
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
               <button 
                 onClick={handleSaveMember}
                 className="px-4 py-2 text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition-colors"
@@ -2042,15 +2042,15 @@ export default function App() {
       {showEditTaskModal && editingTask && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden flex flex-col">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h3 className="font-bold text-base sm:text-lg text-gray-800 flex items-center gap-2">
                 <Pencil size={18} className="text-blue-600" />
                 タスクを編集
               </h3>
               <button onClick={() => setShowEditTaskModal(false)} className="text-gray-400 hover:text-gray-600 p-2 text-xl font-bold leading-none">✕</button>
             </div>
             
-            <div className="p-6 space-y-4 overflow-y-auto">
+            <div className="p-4 sm:p-6 space-y-4 overflow-y-auto">
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="block text-sm font-bold text-gray-700">タスク名 <span className="text-red-500">*</span></label>
@@ -2126,7 +2126,7 @@ export default function App() {
               </div>
             </div>
             
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
               <button 
                 onClick={confirmAndSaveEditTask}
                 className="px-4 py-2 text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition-colors"
@@ -2248,14 +2248,14 @@ export default function App() {
       {showTaskTemplateModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden flex flex-col animate-fade-in-up">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h3 className="font-bold text-base sm:text-lg text-gray-800 flex items-center gap-2">
                 <Pencil size={18} className="text-indigo-600" /> 定型タスク名の編集
               </h3>
               <button onClick={() => setShowTaskTemplateModal(false)} className="text-gray-400 hover:text-gray-600 p-2 text-xl font-bold leading-none">✕</button>
             </div>
             
-            <div className="p-6 overflow-y-auto max-h-[60vh] space-y-4">
+            <div className="p-4 sm:p-6 overflow-y-auto max-h-[60vh] space-y-4">
               <p className="text-sm text-gray-600 font-medium">
                 タスクを追加する際に、プルダウンから選べる「よく使うタスク名」を登録・削除できます。
               </p>
@@ -2301,7 +2301,7 @@ export default function App() {
               </div>
             </div>
             
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-100 flex justify-end">
               <button 
                 onClick={() => setShowTaskTemplateModal(false)}
                 className="px-4 py-2 text-sm font-bold bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg transition-colors"
@@ -2317,7 +2317,7 @@ export default function App() {
       {dialogConfig.isOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
           <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden flex flex-col animate-fade-in-up">
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <h3 className={`font-black text-lg mb-2 flex items-center gap-2 ${dialogConfig.type === 'confirm' ? 'text-red-600' : 'text-gray-800'}`}>
                 {dialogConfig.type === 'confirm' && <Trash2 size={20} />}
                 {dialogConfig.title}
@@ -2327,7 +2327,7 @@ export default function App() {
               </p>
             </div>
             
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
               {dialogConfig.type === 'confirm' && (
                 <button 
                   onClick={closeDialog}
