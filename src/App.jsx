@@ -132,6 +132,18 @@ export default function App() {
     onConfirm: null 
   });
 
+  // ブラウザの自動翻訳ポップアップを防止する設定
+  useEffect(() => {
+    document.documentElement.lang = 'ja';
+    let meta = document.querySelector('meta[name="google"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'google';
+      meta.content = 'notranslate';
+      document.head.appendChild(meta);
+    }
+  }, []);
+
   // Authentication Listener
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
