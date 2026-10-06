@@ -424,23 +424,22 @@ export default function App() {
       statuses: targetMembers.reduce((acc, m) => ({ ...acc, [m.id]: 'pending' }), {})
     };
     
-    // Firestoreにタスクを追加
-    await setDoc(doc(db, 'tasks', newId), newTask);
-    
-    showToast(`「${newTaskTitle}」を追加しました`);
-    
     // 宛先を生成（閲覧者を除く全対象メンバー）
     const toEmails = targetMembers.map(m => m.email).filter(e => e).join(',');
     
-    // 選択された方法でメールを起動
+    // 【修正点】ポップアップブロックを回避するため、Firestoreへの保存より「先に」メールを起動する
     if (mailMethod === 'mailto') {
       const mailtoLink = `mailto:${toEmails}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
       window.location.href = mailtoLink;
     } else {
-      // fujitelecom.co.jp ドメインのアカウントを強制的に開くURLに変更
       const gmailLink = `https://mail.google.com/a/fujitelecom.co.jp/mail/?view=cm&fs=1&to=${encodeURIComponent(toEmails)}&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
       window.open(gmailLink, '_blank');
     }
+    
+    // その裏（バックグラウンド）でFirestoreにタスクを追加
+    await setDoc(doc(db, 'tasks', newId), newTask);
+    
+    showToast(`「${newTaskTitle}」を追加しました`);
     
     setNewTaskTitle('');
     setNewTaskDueDate('');
