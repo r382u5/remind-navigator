@@ -411,7 +411,7 @@ export default function App() {
     setShowEmailConfirmModal(true);
   };
 
-  const confirmAndAddTask = async () => {
+  const confirmAndAddTask = async (mailMethod = 'gmail') => {
     const newId = Date.now().toString(); // FirestoreのドキュメントIDは文字列
     const newTask = {
       id: newId,
@@ -432,8 +432,8 @@ export default function App() {
     // 宛先を生成（閲覧者を除く全対象メンバー）
     const toEmails = targetMembers.map(m => m.email).filter(e => e).join(',');
     
-    // PCとスマホでメール起動の方法を分ける
-    if (isMobileDevice()) {
+    // 選択された方法でメールを起動
+    if (mailMethod === 'mailto') {
       const mailtoLink = `mailto:${toEmails}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
       window.location.href = mailtoLink;
     } else {
@@ -467,12 +467,12 @@ export default function App() {
     setShowRemindModal(true);
   };
 
-  const confirmAndSendRemind = () => {
+  const confirmAndSendRemind = (mailMethod = 'gmail') => {
     const pendingMembers = targetMembers.filter(m => remindTask.statuses[m.id] !== 'completed');
     const toEmails = pendingMembers.map(m => m.email).filter(e => e).join(',');
     
-    // PCとスマホでメール起動の方法を分ける
-    if (isMobileDevice()) {
+    // 選択された方法でメールを起動
+    if (mailMethod === 'mailto') {
       const mailtoLink = `mailto:${toEmails}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
       window.location.href = mailtoLink;
     } else {
@@ -480,7 +480,7 @@ export default function App() {
       window.open(gmailLink, '_blank');
     }
     
-    showToast(`Gmailを起動しました`);
+    showToast(`メールを起動しました`);
     setShowRemindModal(false);
     setRemindTask(null);
   };
@@ -1838,22 +1838,30 @@ export default function App() {
               </div>
             </div>
             
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
               <button 
                 onClick={() => {
                   setShowEmailConfirmModal(false);
                   setShowNewTaskModal(true);
                 }}
-                className="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
+                className="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-200 rounded-lg transition-colors w-full sm:w-auto text-center order-last sm:order-first"
               >
                 戻る
               </button>
-              <button 
-                onClick={confirmAndAddTask}
-                className="px-5 py-2.5 text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition-colors flex items-center gap-2"
-              >
-                <Send size={16} /> 保存してGmail起動
-              </button>
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <button 
+                  onClick={() => confirmAndAddTask('mailto')}
+                  className="px-4 py-2.5 text-sm font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
+                >
+                  <Mail size={16} /> 標準メール
+                </button>
+                <button 
+                  onClick={() => confirmAndAddTask('gmail')}
+                  className="px-5 py-2.5 text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
+                >
+                  <Send size={16} /> Gmail (ブラウザ)
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1909,12 +1917,18 @@ export default function App() {
               
             </div>
             
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
               <button 
-                onClick={confirmAndSendRemind}
-                className="px-4 py-2 text-sm font-bold bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                onClick={() => confirmAndSendRemind('mailto')}
+                className="px-4 py-2.5 text-sm font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
               >
-                <Send size={16} /> Gmailを起動
+                <Mail size={16} /> 標準メール
+              </button>
+              <button 
+                onClick={() => confirmAndSendRemind('gmail')}
+                className="px-5 py-2.5 text-sm font-bold bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
+              >
+                <Send size={16} /> Gmail (ブラウザ)
               </button>
             </div>
           </div>
