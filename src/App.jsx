@@ -956,10 +956,10 @@ export default function App() {
                         {userRole === 'admin' && (
                           <div className="flex items-center gap-1">
                             <button onClick={(e) => { e.stopPropagation(); handleOpenEditTask(task); }} className="text-gray-400 hover:text-blue-600 transition-colors p-2" title="編集">
-                              <Pencil size={20} />
+                              <Pencil size={22} />
                             </button>
                             <button onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }} className="text-gray-400 hover:text-red-500 transition-colors p-2" title="削除">
-                              <Trash2 size={20} />
+                              <Trash2 size={22} />
                             </button>
                           </div>
                         )}
@@ -1526,7 +1526,7 @@ export default function App() {
                             className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="編集"
                           >
-                            <Pencil size={20} />
+                            <Pencil size={22} />
                           </button>
                           {member.id !== currentUser.id && (
                             <button 
@@ -1534,7 +1534,7 @@ export default function App() {
                               className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                               title="削除"
                             >
-                              <Trash2 size={20} />
+                              <Trash2 size={22} />
                             </button>
                           )}
                         </div>
@@ -1584,14 +1584,14 @@ export default function App() {
                       onClick={() => handleOpenMemberModal(member)}
                       className="p-2.5 text-gray-500 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 rounded-lg transition-colors border border-gray-100 shadow-sm"
                     >
-                      <Pencil size={20} />
+                      <Pencil size={22} />
                     </button>
                     {member.id !== currentUser.id && (
                       <button 
                         onClick={() => handleDeleteMember(member.id, member.name)}
                         className="p-2.5 text-gray-500 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-lg transition-colors border border-gray-100 shadow-sm"
                       >
-                        <Trash2 size={20} />
+                        <Trash2 size={22} />
                       </button>
                     )}
                   </div>
