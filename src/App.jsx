@@ -956,10 +956,10 @@ export default function App() {
                         {userRole === 'admin' && (
                           <div className="flex items-center gap-1">
                             <button onClick={(e) => { e.stopPropagation(); handleOpenEditTask(task); }} className="text-gray-400 hover:text-blue-600 transition-colors p-2" title="編集">
-                              <Pencil size={24} />
+                              <Pencil size={20} />
                             </button>
                             <button onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }} className="text-gray-400 hover:text-red-500 transition-colors p-2" title="削除">
-                              <Trash2 size={24} />
+                              <Trash2 size={20} />
                             </button>
                           </div>
                         )}
@@ -1526,7 +1526,7 @@ export default function App() {
                             className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="編集"
                           >
-                            <Pencil size={24} />
+                            <Pencil size={20} />
                           </button>
                           {member.id !== currentUser.id && (
                             <button 
@@ -1534,7 +1534,7 @@ export default function App() {
                               className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                               title="削除"
                             >
-                              <Trash2 size={24} />
+                              <Trash2 size={20} />
                             </button>
                           )}
                         </div>
