@@ -1616,11 +1616,22 @@ export default function App() {
         {}
         {viewMode === 'member' && (
           <div className="max-w-3xl mx-auto space-y-6">
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white shadow-md">
-              <h2 className="text-2xl font-bold mb-1">{greeting}</h2>
-              <p className={`text-sm md:text-base font-bold ${currentUserOverdueCount > 0 ? 'text-red-200' : 'text-indigo-100'}`}>
-                {memberStatusMessage}
-              </p>
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h2 className="text-2xl font-bold mb-1">{greeting}</h2>
+                <p className={`text-sm md:text-base font-bold ${currentUserOverdueCount > 0 ? 'text-red-200' : 'text-indigo-100'}`}>
+                  {memberStatusMessage}
+                </p>
+              </div>
+              <a 
+                href="https://sites.sateraito.jp/fujitelecom.co.jp/site/portal?hl=ja" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors border border-white/30 shadow-sm shrink-0"
+              >
+                <ExternalLink size={16} />
+                社内ポータルへ
+              </a>
             </div>
 
             <div className="space-y-4">
