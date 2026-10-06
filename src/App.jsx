@@ -694,13 +694,13 @@ export default function App() {
   }
 
   if (isAuthLoading) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center font-bold text-gray-500">読み込み中...</div>;
+    return <div translate="no" className="min-h-screen bg-gray-50 flex items-center justify-center font-bold text-gray-500">読み込み中...</div>;
   }
 
   // ▼▼▼ FirebaseのGoogleログイン画面 ▼▼▼
   if (!authUser) {
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      <div translate="no" className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
         <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center animate-fade-in-up border-t-4 border-indigo-600">
           <div className="flex justify-center mb-4">
             <div className="bg-indigo-600 text-white p-3 rounded-xl shadow-sm">
@@ -745,13 +745,13 @@ export default function App() {
 
   // currentUserの準備ができるまでローディング表示
   if (!currentUser) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center font-bold text-gray-500">データを読み込んでいます...</div>;
+    return <div translate="no" className="min-h-screen bg-gray-50 flex items-center justify-center font-bold text-gray-500">データを読み込んでいます...</div>;
   }
 
   const userRole = currentUser.role;
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans pb-20">
+    <div translate="no" className="min-h-screen bg-gray-50 text-gray-900 font-sans pb-20">
       
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm relative">
