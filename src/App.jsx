@@ -1616,10 +1616,10 @@ export default function App() {
         {}
         {viewMode === 'member' && (
           <div className="max-w-3xl mx-auto space-y-6">
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h2 className="text-2xl font-bold mb-1">{greeting}</h2>
-                <p className={`text-sm md:text-base font-bold ${currentUserOverdueCount > 0 ? 'text-red-200' : 'text-indigo-100'}`}>
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-4 sm:p-6 text-white shadow-md flex flex-row justify-between items-center gap-3 sm:gap-4">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-lg sm:text-2xl font-bold mb-0.5 sm:mb-1 truncate">{greeting}</h2>
+                <p className={`text-xs sm:text-sm md:text-base font-bold leading-tight sm:leading-normal ${currentUserOverdueCount > 0 ? 'text-red-200' : 'text-indigo-100'}`}>
                   {memberStatusMessage}
                 </p>
               </div>
@@ -1627,10 +1627,11 @@ export default function App() {
                 href="https://sites.sateraito.jp/fujitelecom.co.jp/site/portal?hl=ja" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors border border-white/30 shadow-sm shrink-0"
+                className="inline-flex items-center justify-center gap-1 sm:gap-2 bg-white/20 hover:bg-white/30 text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold transition-colors border border-white/30 shadow-sm shrink-0"
               >
-                <ExternalLink size={16} />
-                社内ポータルへ
+                <ExternalLink size={14} className="sm:w-4 sm:h-4 shrink-0" />
+                <span className="hidden sm:inline">社内ポータルへ</span>
+                <span className="sm:hidden">社内ポータル</span>
               </a>
             </div>
 
