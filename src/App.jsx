@@ -777,7 +777,7 @@ export default function App() {
                     viewMode === 'admin' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
-                  {userRole === 'viewer' ? <Eye size={20} className="shrink-0" /> : <LayoutDashboard size={20} className="shrink-0" />}
+                  {userRole === 'viewer' ? <Eye size={18} className="shrink-0" /> : <LayoutDashboard size={18} className="shrink-0" />}
                   <span className="truncate">{userRole === 'viewer' ? '全体進捗' : '管理者'}</span>
                 </button>
               )}
@@ -788,7 +788,7 @@ export default function App() {
                   viewMode === 'calendar' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-600 hover:text-gray-800'
                 }`}
               >
-                <Calendar size={20} className="shrink-0" />
+                <Calendar size={18} className="shrink-0" />
                 <span className="truncate">カレンダー</span>
               </button>
 
@@ -800,7 +800,7 @@ export default function App() {
                     viewMode === 'manage_members' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
-                  <Users size={20} className="shrink-0" />
+                  <Users size={18} className="shrink-0" />
                   <span className="truncate">メンバー管理</span>
                 </button>
               )}
@@ -813,7 +813,7 @@ export default function App() {
                     viewMode === 'member' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
-                  <User size={20} className="shrink-0" />
+                  <User size={18} className="shrink-0" />
                   <span className="truncate">私のタスク</span>
                 </button>
               )}
