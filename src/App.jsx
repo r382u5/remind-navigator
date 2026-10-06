@@ -955,11 +955,11 @@ export default function App() {
                         {/* 編集・削除は管理者のみ */}
                         {userRole === 'admin' && (
                           <div className="flex items-center gap-1">
-                            <button onClick={(e) => { e.stopPropagation(); handleOpenEditTask(task); }} className="text-gray-400 hover:text-blue-600 transition-colors p-1" title="編集">
-                              <Pencil size={20} />
+                            <button onClick={(e) => { e.stopPropagation(); handleOpenEditTask(task); }} className="text-gray-400 hover:text-blue-600 transition-colors p-2" title="編集">
+                              <Pencil size={24} />
                             </button>
-                            <button onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }} className="text-gray-400 hover:text-red-500 transition-colors p-1" title="削除">
-                              <Trash2 size={20} />
+                            <button onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }} className="text-gray-400 hover:text-red-500 transition-colors p-2" title="削除">
+                              <Trash2 size={24} />
                             </button>
                           </div>
                         )}
@@ -1526,7 +1526,7 @@ export default function App() {
                             className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="編集"
                           >
-                            <Pencil size={20} />
+                            <Pencil size={24} />
                           </button>
                           {member.id !== currentUser.id && (
                             <button 
@@ -1534,7 +1534,7 @@ export default function App() {
                               className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                               title="削除"
                             >
-                              <Trash2 size={20} />
+                              <Trash2 size={24} />
                             </button>
                           )}
                         </div>
@@ -1582,16 +1582,16 @@ export default function App() {
                   <div className="flex flex-col gap-1.5 shrink-0">
                     <button 
                       onClick={() => handleOpenMemberModal(member)}
-                      className="p-2 text-gray-500 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 rounded-lg transition-colors border border-gray-100 shadow-sm"
+                      className="p-2.5 text-gray-500 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 rounded-lg transition-colors border border-gray-100 shadow-sm"
                     >
-                      <Pencil size={16} />
+                      <Pencil size={20} />
                     </button>
                     {member.id !== currentUser.id && (
                       <button 
                         onClick={() => handleDeleteMember(member.id, member.name)}
-                        className="p-2 text-gray-500 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-lg transition-colors border border-gray-100 shadow-sm"
+                        className="p-2.5 text-gray-500 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-lg transition-colors border border-gray-100 shadow-sm"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={20} />
                       </button>
                     )}
                   </div>
@@ -1711,7 +1711,7 @@ export default function App() {
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden flex flex-col">
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
               <h3 className="font-bold text-lg text-gray-800">新しいタスクを追加</h3>
-              <button onClick={() => setShowNewTaskModal(false)} className="text-gray-400 hover:text-gray-600 p-1">✕</button>
+              <button onClick={() => setShowNewTaskModal(false)} className="text-gray-400 hover:text-gray-600 p-2 text-xl font-bold leading-none">✕</button>
             </div>
             
             <div className="p-6 space-y-4 overflow-y-auto">
@@ -1813,7 +1813,7 @@ export default function App() {
                 <Mail className="text-indigo-600" />
                 通知メールの確認
               </h3>
-              <button onClick={() => setShowEmailConfirmModal(false)} className="text-gray-400 hover:text-gray-600 p-1">✕</button>
+              <button onClick={() => setShowEmailConfirmModal(false)} className="text-gray-400 hover:text-gray-600 p-2 text-xl font-bold leading-none">✕</button>
             </div>
             
             <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
@@ -1874,7 +1874,7 @@ export default function App() {
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden flex flex-col">
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
               <h3 className="font-bold text-base sm:text-lg text-gray-800">リマインドメールの確認</h3>
-              <button onClick={() => setShowRemindModal(false)} className="text-gray-400 hover:text-gray-600 p-1">✕</button>
+              <button onClick={() => setShowRemindModal(false)} className="text-gray-400 hover:text-gray-600 p-2 text-xl font-bold leading-none">✕</button>
             </div>
             
             <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
@@ -1944,7 +1944,7 @@ export default function App() {
               <h3 className="font-bold text-lg text-gray-800">
                 {editingMember ? 'メンバーを編集' : '新しいメンバーを追加'}
               </h3>
-              <button onClick={() => setShowMemberModal(false)} className="text-gray-400 hover:text-gray-600 p-1">✕</button>
+              <button onClick={() => setShowMemberModal(false)} className="text-gray-400 hover:text-gray-600 p-2 text-xl font-bold leading-none">✕</button>
             </div>
             
             <div className="p-6 space-y-4">
@@ -2047,7 +2047,7 @@ export default function App() {
                 <Pencil size={18} className="text-blue-600" />
                 タスクを編集
               </h3>
-              <button onClick={() => setShowEditTaskModal(false)} className="text-gray-400 hover:text-gray-600 p-1">✕</button>
+              <button onClick={() => setShowEditTaskModal(false)} className="text-gray-400 hover:text-gray-600 p-2 text-xl font-bold leading-none">✕</button>
             </div>
             
             <div className="p-6 space-y-4 overflow-y-auto">
@@ -2146,7 +2146,7 @@ export default function App() {
               <h3 className="font-bold text-base sm:text-lg text-gray-800 flex items-center gap-2">
                 <Calendar size={18} className="text-indigo-600" /> タスクの状況確認
               </h3>
-              <button onClick={() => {setShowCalendarTaskModal(false); setSelectedCalendarTask(null);}} className="text-gray-400 hover:text-gray-600 p-2">✕</button>
+              <button onClick={() => {setShowCalendarTaskModal(false); setSelectedCalendarTask(null);}} className="text-gray-400 hover:text-gray-600 p-2 text-xl font-bold leading-none">✕</button>
             </div>
             
             <div className="p-4 sm:p-6 overflow-y-auto flex-1 min-h-0">
@@ -2252,7 +2252,7 @@ export default function App() {
               <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
                 <Pencil size={18} className="text-indigo-600" /> 定型タスク名の編集
               </h3>
-              <button onClick={() => setShowTaskTemplateModal(false)} className="text-gray-400 hover:text-gray-600 p-1">✕</button>
+              <button onClick={() => setShowTaskTemplateModal(false)} className="text-gray-400 hover:text-gray-600 p-2 text-xl font-bold leading-none">✕</button>
             </div>
             
             <div className="p-6 overflow-y-auto max-h-[60vh] space-y-4">
