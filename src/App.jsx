@@ -1808,38 +1808,38 @@ export default function App() {
       {showEmailConfirmModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden flex flex-col">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h3 className="font-bold text-base sm:text-lg text-gray-800 flex items-center gap-2">
                 <Mail className="text-indigo-600" />
                 通知メールの確認
               </h3>
               <button onClick={() => setShowEmailConfirmModal(false)} className="text-gray-400 hover:text-gray-600 p-1">✕</button>
             </div>
             
-            <div className="p-6 space-y-4">
-              <p className="text-sm text-gray-600 font-bold mb-2">タスクを追加し、Gmailを起動します。</p>
+            <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+              <p className="text-xs sm:text-sm text-gray-600 font-bold mb-1 sm:mb-2">タスクを追加し、Gmailを起動します。</p>
               
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">件名</label>
+                <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1">件名</label>
                 <input 
                   type="text" 
                   value={mailSubject}
                   onChange={(e) => setMailSubject(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">本文</label>
+                <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1">本文</label>
                 <textarea 
                   value={mailBody}
                   onChange={(e) => setMailBody(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 h-40 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 h-24 sm:h-40 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 ></textarea>
               </div>
             </div>
             
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
               <button 
                 onClick={() => {
                   setShowEmailConfirmModal(false);
@@ -1849,7 +1849,7 @@ export default function App() {
               >
                 戻る
               </button>
-              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <div className="flex flex-col-reverse sm:flex-row gap-2 w-full sm:w-auto">
                 <button 
                   onClick={() => confirmAndAddTask('mailto')}
                   className="px-4 py-2.5 text-sm font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
@@ -1872,23 +1872,23 @@ export default function App() {
       {showRemindModal && remindTask && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden flex flex-col">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h3 className="font-bold text-lg text-gray-800">リマインドメールの確認</h3>
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h3 className="font-bold text-base sm:text-lg text-gray-800">リマインドメールの確認</h3>
               <button onClick={() => setShowRemindModal(false)} className="text-gray-400 hover:text-gray-600 p-1">✕</button>
             </div>
             
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
               {(() => {
                 const pendingMembers = targetMembers.filter(m => remindTask.statuses[m.id] !== 'completed');
                 return (
-                  <div className="bg-orange-50 border border-orange-100 p-3 rounded-lg flex flex-col gap-2 text-orange-800 text-sm mb-4">
-                    <div className="flex gap-2 items-start">
+                  <div className="bg-orange-50 border border-orange-100 p-2 sm:p-3 rounded-lg flex flex-col gap-1.5 sm:gap-2 text-orange-800 text-xs sm:text-sm mb-2 sm:mb-4">
+                    <div className="flex gap-1.5 sm:gap-2 items-start">
                       <Bell size={18} className="shrink-0 text-orange-600 mt-0.5" />
                       <p className="font-bold">未完了のメンバー {pendingMembers.length} 名を宛先にしてGmailを起動します。</p>
                     </div>
-                    <div className="flex flex-wrap gap-1.5 ml-7">
+                    <div className="flex flex-wrap gap-1.5 ml-6 sm:ml-7">
                       {pendingMembers.map(m => (
-                        <span key={m.id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-orange-200 text-orange-900 border border-orange-300">
+                        <span key={m.id} className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold bg-orange-200 text-orange-900 border border-orange-300">
                           {m.name}
                         </span>
                       ))}
@@ -1898,27 +1898,27 @@ export default function App() {
               })()}
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">件名</label>
+                <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1">件名</label>
                 <input 
                   type="text" 
                   value={mailSubject}
                   onChange={(e) => setMailSubject(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">本文</label>
+                <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1">本文</label>
                 <textarea 
                   value={mailBody}
                   onChange={(e) => setMailBody(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 h-40 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 h-24 sm:h-40 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 ></textarea>
               </div>
               
             </div>
             
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-100 flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
               <button 
                 onClick={() => confirmAndSendRemind('mailto')}
                 className="px-4 py-2.5 text-sm font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
