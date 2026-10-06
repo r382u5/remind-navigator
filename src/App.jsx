@@ -437,7 +437,8 @@ export default function App() {
       const mailtoLink = `mailto:${toEmails}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
       window.location.href = mailtoLink;
     } else {
-      const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(toEmails)}&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+      // fujitelecom.co.jp ドメインのアカウントを強制的に開くURLに変更
+      const gmailLink = `https://mail.google.com/a/fujitelecom.co.jp/mail/?view=cm&fs=1&to=${encodeURIComponent(toEmails)}&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
       window.open(gmailLink, '_blank');
     }
     
@@ -476,7 +477,8 @@ export default function App() {
       const mailtoLink = `mailto:${toEmails}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
       window.location.href = mailtoLink;
     } else {
-      const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(toEmails)}&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+      // fujitelecom.co.jp ドメインのアカウントを強制的に開くURLに変更
+      const gmailLink = `https://mail.google.com/a/fujitelecom.co.jp/mail/?view=cm&fs=1&to=${encodeURIComponent(toEmails)}&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
       window.open(gmailLink, '_blank');
     }
     
