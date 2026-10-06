@@ -884,7 +884,7 @@ export default function App() {
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
                   <LayoutDashboard className="text-indigo-600" />
-                  タスク進捗ダッシュボード
+                  タスク進捗状況
                 </h2>
                 <p className="text-gray-600 text-sm mt-1 font-medium">チーム全体の状況を把握し、遅れているメンバーにリマインドを送れます。</p>
               </div>
@@ -1017,8 +1017,8 @@ export default function App() {
               <div className="lg:col-span-2">
                 <div className="hidden md:flex bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-col h-full">
                   <div className="p-4 border-b border-gray-200 bg-gray-50 shrink-0">
-                    <h3 className="font-bold text-gray-700 flex items-center gap-2">
-                      <Users size={18} />
+                    <h3 className="font-bold text-lg text-gray-800 flex items-center gap-1.5 sm:gap-2">
+                      <Users size={18} className="text-gray-600" />
                       メンバー別 完了状況
                     </h3>
                   </div>
@@ -1127,8 +1127,8 @@ export default function App() {
 
                 {/* スマホ用カード表示 */}
                 <div className="md:hidden flex flex-col space-y-3 mt-4">
-                  <h3 className="font-bold text-gray-700 flex items-center gap-2 mb-1 px-1">
-                    <Users size={18} />
+                  <h3 className="font-bold text-lg text-gray-800 flex items-center gap-1.5 sm:gap-2 mb-1 px-1">
+                    <Users size={18} className="text-gray-600" />
                     メンバー別 完了状況
                   </h3>
                   
