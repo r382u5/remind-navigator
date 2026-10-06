@@ -956,10 +956,10 @@ export default function App() {
                         {userRole === 'admin' && (
                           <div className="flex items-center gap-1">
                             <button onClick={(e) => { e.stopPropagation(); handleOpenEditTask(task); }} className="text-gray-400 hover:text-blue-600 transition-colors p-1" title="編集">
-                              <Pencil size={16} />
+                              <Pencil size={20} />
                             </button>
                             <button onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }} className="text-gray-400 hover:text-red-500 transition-colors p-1" title="削除">
-                              <Trash2 size={16} />
+                              <Trash2 size={20} />
                             </button>
                           </div>
                         )}
@@ -2146,7 +2146,7 @@ export default function App() {
               <h3 className="font-bold text-base sm:text-lg text-gray-800 flex items-center gap-2">
                 <Calendar size={18} className="text-indigo-600" /> タスクの状況確認
               </h3>
-              <button onClick={() => {setShowCalendarTaskModal(false); setSelectedCalendarTask(null);}} className="text-gray-400 hover:text-gray-600 p-1">✕</button>
+              <button onClick={() => {setShowCalendarTaskModal(false); setSelectedCalendarTask(null);}} className="text-gray-400 hover:text-gray-600 p-2">✕</button>
             </div>
             
             <div className="p-4 sm:p-6 overflow-y-auto flex-1 min-h-0">
