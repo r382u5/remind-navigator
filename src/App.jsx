@@ -1618,7 +1618,7 @@ export default function App() {
           <div className="max-w-3xl mx-auto space-y-6">
             <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-4 sm:p-6 text-white shadow-md flex flex-row justify-between items-center gap-3 sm:gap-4">
               <div className="flex-1 min-w-0">
-                <h2 className="text-lg sm:text-2xl font-bold mb-0.5 sm:mb-1 truncate">{greeting}</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-0.5 sm:mb-1 truncate">{greeting}</h2>
                 <p className={`text-xs sm:text-sm md:text-base font-bold leading-tight sm:leading-normal ${currentUserOverdueCount > 0 ? 'text-red-200' : 'text-indigo-100'}`}>
                   {memberStatusMessage}
                 </p>
