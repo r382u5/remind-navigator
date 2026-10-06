@@ -773,22 +773,22 @@ export default function App() {
               {(userRole === 'admin' || userRole === 'viewer') && (
                 <button 
                   onClick={() => setViewMode('admin')}
-                  className={`flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-md text-xs sm:text-sm font-bold transition-all ${
+                  className={`flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-md text-sm font-bold transition-all ${
                     viewMode === 'admin' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
-                  {userRole === 'viewer' ? <Eye size={16} className="shrink-0" /> : <LayoutDashboard size={16} className="shrink-0" />}
+                  {userRole === 'viewer' ? <Eye size={20} className="shrink-0" /> : <LayoutDashboard size={20} className="shrink-0" />}
                   <span className="truncate">{userRole === 'viewer' ? '全体進捗' : '管理者'}</span>
                 </button>
               )}
 
               <button 
                 onClick={() => setViewMode('calendar')}
-                className={`flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-md text-xs sm:text-sm font-bold transition-all ${
+                className={`flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-md text-sm font-bold transition-all ${
                   viewMode === 'calendar' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-600 hover:text-gray-800'
                 }`}
               >
-                <Calendar size={16} className="shrink-0" />
+                <Calendar size={20} className="shrink-0" />
                 <span className="truncate">カレンダー</span>
               </button>
 
@@ -796,11 +796,11 @@ export default function App() {
               {userRole === 'admin' && (
                 <button 
                   onClick={() => setViewMode('manage_members')}
-                  className={`flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-md text-xs sm:text-sm font-bold transition-all ${
+                  className={`flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-md text-sm font-bold transition-all ${
                     viewMode === 'manage_members' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
-                  <Users size={16} className="shrink-0" />
+                  <Users size={20} className="shrink-0" />
                   <span className="truncate">メンバー管理</span>
                 </button>
               )}
@@ -809,11 +809,11 @@ export default function App() {
               {(userRole === 'admin' || userRole === 'member') && (
                 <button 
                   onClick={() => setViewMode('member')}
-                  className={`flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-md text-xs sm:text-sm font-bold transition-all ${
+                  className={`flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-md text-sm font-bold transition-all ${
                     viewMode === 'member' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
-                  <User size={16} className="shrink-0" />
+                  <User size={20} className="shrink-0" />
                   <span className="truncate">私のタスク</span>
                 </button>
               )}
