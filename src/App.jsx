@@ -1849,18 +1849,18 @@ export default function App() {
               >
                 戻る
               </button>
-              <div className="flex flex-col-reverse sm:flex-row gap-2 w-full sm:w-auto">
-                <button 
-                  onClick={() => confirmAndAddTask('mailto')}
-                  className="px-4 py-2.5 text-sm font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
-                >
-                  <Mail size={16} /> 標準メール
-                </button>
+              <div className="flex flex-col sm:flex-row-reverse gap-2 w-full sm:w-auto">
                 <button 
                   onClick={() => confirmAndAddTask('gmail')}
                   className="px-5 py-2.5 text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
                 >
                   <Send size={16} /> Gmail (ブラウザ)
+                </button>
+                <button 
+                  onClick={() => confirmAndAddTask('mailto')}
+                  className="px-4 py-2.5 text-sm font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
+                >
+                  <Mail size={16} /> 標準メール
                 </button>
               </div>
             </div>
@@ -1918,18 +1918,18 @@ export default function App() {
               
             </div>
             
-            <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-100 flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
-              <button 
-                onClick={() => confirmAndSendRemind('mailto')}
-                className="px-4 py-2.5 text-sm font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
-              >
-                <Mail size={16} /> 標準メール
-              </button>
+            <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row-reverse justify-start gap-2 sm:gap-3">
               <button 
                 onClick={() => confirmAndSendRemind('gmail')}
                 className="px-5 py-2.5 text-sm font-bold bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
               >
                 <Send size={16} /> Gmail (ブラウザ)
+              </button>
+              <button 
+                onClick={() => confirmAndSendRemind('mailto')}
+                className="px-4 py-2.5 text-sm font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
+              >
+                <Mail size={16} /> 標準メール
               </button>
             </div>
           </div>
